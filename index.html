@@ -114,6 +114,14 @@ pre.io{font-size:13px;white-space:pre-wrap;background:var(--cn)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:center;z-index:60;padding:16px}
 .modal[hidden]{display:none}.mc{max-width:460px;width:100%;background:var(--sf2);position:relative;max-height:calc(100vh - 32px);overflow:auto}.mx{position:absolute;top:10px;right:10px;width:32px;height:32px;min-height:32px}.mc h2{padding-right:36px}
 .mc a{color:var(--ac)}.mc .btn{margin-top:6px}
+.fl{display:block;font-size:14px;color:var(--mu);margin:10px 0 4px}
+.fi{width:100%;min-height:40px;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--sf);color:var(--tx);font:inherit;font-size:14px}
+.fi:focus{outline:2px solid var(--ac);outline-offset:1px}
+#shm .btn{width:100%;margin-top:10px;justify-content:center}#shres{margin-top:14px}.shs{font-size:14px;color:var(--mu);margin:8px 0 0}
+body.sv aside,body.sv #share,body.sv #reset,body.sv #addf,body.sv .tab .x{display:none!important}
+body.sv .app{grid-template-columns:minmax(0,1fr)}body.sv main{grid-column:1}
+.svh{border-left:4px solid var(--ac)}.svh .who{font-size:20px;font-weight:700;margin:2px 0}.svh .meta{color:var(--mu);font-size:14px}
+.svh .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.svh .acts .btn{flex:1 1 180px;justify-content:center}
 .mc h3{font-size:15px;margin:14px 0 4px}.mc ul{margin:4px 0 8px;padding-left:20px}.mc li{margin:3px 0}
 .gh{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--tx)!important}
 .gh svg{color:#e3b341;fill:#e3b341;stroke:#e3b341}
@@ -334,6 +342,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
     <button class="ib cv" data-k="ed" aria-label="Згорнути" aria-expanded="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
     <div class="ftabs" role="tablist" id="ftabs"></div>
     <span class="grow"></span>
+    <button class="ib" id="share" aria-label="Поділитися роботою" title="Поділитися роботою"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></button>
     <button class="ib" id="copy" aria-label="Скопіювати код" title="Скопіювати код"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
     <button class="ib" id="reset" aria-label="Скинути код" title="Скинути код"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></button>
     <button class="btn stop" id="stop" hidden title="Зупинити програму"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span>Стоп</span></button>
@@ -430,6 +439,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 <li>Проходь уроки по черзі: завдання поступово ускладнюються.</li>
 <li>Прочитай теорію, розбери приклад, виконай завдання в редакторі й натисни «Запустити» (або Ctrl+Enter).</li>
 <li>Відмічай пункти чекліста. Коли все готово — «Позначити виконаним».</li>
+<li>Щоб здати роботу, натисни кнопку «Поділитися» в редакторі, скопіюй посилання і встав його у завдання в Google Classroom.</li>
 <li>Код, прогрес і тема зберігаються в цьому браузері. «Скинути код» повертає заготовку уроку.</li>
 <li>Код курсу — звичайний Python: його можна без змін запустити в Thonny чи VS Code.</li>
 </ul>
@@ -441,6 +451,18 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 </ul>
 <a class="btn gh" href="https://github.com/whyuxavier/learn-python" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/></svg>Репозиторій на GitHub</a>
 <p>Автор сайту: <a href="https://github.com/whyuxavier" target="_blank" rel="noopener noreferrer">whyuxavier</a></p></div></div>
+<div class="modal" id="shm" hidden role="dialog" aria-modal="true" aria-labelledby="sht"><div class="card mc">
+<button class="ib mx" id="shclose" aria-label="Закрити"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+<h2 id="sht">Здати роботу</h2>
+<p id="shl" class="shs"></p>
+<label class="fl" for="shn">Прізвище та ім'я</label>
+<input class="fi" id="shn" maxlength="60" autocomplete="name" placeholder="Наприклад: Коваленко Марія">
+<button class="btn pr" id="shgo">Створити посилання</button>
+<div id="shres" hidden>
+<input class="fi" id="shu" readonly aria-label="Посилання на роботу">
+<button class="btn pr" id="shcp">Копіювати посилання</button>
+<p class="shs">Встав посилання у завдання в Google Classroom. Якщо зміниш код — створи нове посилання.</p>
+</div></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script type="text/x-python" data-path="_lpbridge.py">
 """Міст між Python (Pyodide) і сторінкою курсу. Службовий модуль."""
@@ -5605,7 +5627,8 @@ function starterFiles(i){
 }
 function getFiles(i){const v=store.get(codeKey(i),null);return (v&&v.length)?v:starterFiles(i)}
 let files=[];
-function saveFiles(){store.set(codeKey(cur),files)}
+let shared=null;
+function saveFiles(){if(shared)return;store.set(codeKey(cur),files)}
 function curCode(){return files[file]?files[file][1]:''}
 
 /* ---------- редактор ---------- */
@@ -5635,6 +5658,7 @@ ta.addEventListener('input',()=>{if(files[file])files[file][1]=ta.value;saveFile
 ta.addEventListener('keydown',e=>{
  const s=ta.selectionStart,en=ta.selectionEnd,v=ta.value;
  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCode();return}
+ if(ta.readOnly)return;
  if(e.key==='Tab'){
   e.preventDefault();
   const ls=v.lastIndexOf('\n',s-1)+1;
@@ -6511,7 +6535,9 @@ function renderLesson(){
  $('#mark').onclick=()=>{done=done.includes(cur)?done.filter(x=>x!==cur):done.concat(cur);store.set('done',done);renderNav();renderLesson();toast(done.includes(cur)?'Урок завершено':'Позначку знято')};
  const re=$('#runEx');if(re)re.onclick=()=>runCode(l.ex);
  $('#lesson .chk').onchange=e=>{const c=+e.target.dataset.c;let a=store.get('chk:'+cur,[]);a=e.target.checked?a.concat(c):a.filter(x=>x!==c);store.set('chk:'+cur,a)};
- // Pygame Zero
+ pgzUI(l);
+}
+function pgzUI(l){
  const pg=!!l.pgz;
  $('#run').hidden=pg;$('#out').hidden=pg;$('#pgz').hidden=!pg;$('#clr').hidden=pg;
  $('#outT').textContent=pg?'Як запустити':'Результат';
@@ -6576,6 +6602,8 @@ function renderHome(){
 const isCourse=()=>location.hash==='#course';
 let homeSeen=false;
 function route(){
+ if(location.hash.startsWith('#s=')){openShared(location.hash.slice(3));return}
+ if(shared){shared=null;document.body.classList.remove('sv');ta.readOnly=false;go(store.get('cur',0))}
  const c=isCourse();
  document.body.classList.toggle('home',!c);
  if(!c){renderHome();if(!homeSeen){homeSeen=true;setTimeout(()=>$('.art').classList.add('done'),7496)}}
@@ -6583,7 +6611,7 @@ function route(){
  window.scrollTo(0,0);
 }
 function openCourse(i){if(i!==undefined&&i!==cur)go(i);if(isCourse())route();else location.hash='course'}
-function showHome(){if(isCourse())history.pushState(null,'',location.pathname+location.search);route()}
+function showHome(){if(isCourse()||shared)history.pushState(null,'',location.pathname+location.search);route()}
 $('#start').onclick=()=>openCourse();
 $('#mods').onclick=e=>{const b=e.target.closest('.ml');if(b)openCourse(+b.dataset.i)};
 $('#toProg').onclick=e=>{e.preventDefault();$('#program').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
@@ -6619,7 +6647,69 @@ rz.onpointerdown=e=>{
 rz.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setLc($('#lw').getBoundingClientRect().width+(e.key==='ArrowRight'?24:-24));store.set('ui',ui)}};
 rz.ondblclick=()=>{mainEl.style.removeProperty('--lc');delete ui.lc;store.set('ui',ui)};
 $('#info').onclick=openInfo;$('#mclose').onclick=closeInfo;modal.onclick=e=>{if(e.target===modal)closeInfo()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();if(!modal.hidden)closeInfo()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();if(!modal.hidden)closeInfo();if(!shm.hidden)closeShare()}});
+
+/* ---------- здача роботи посиланням ---------- */
+const b64u=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const ub64=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');const b=atob(s+'==='.slice((s.length+3)%4));const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+const pipe=(u,t)=>new Response(new Blob([u]).stream().pipeThrough(t)).arrayBuffer().then(b=>new Uint8Array(b));
+async function pack(o){
+ const u=new TextEncoder().encode(JSON.stringify(o));
+ if(window.CompressionStream){try{return '1'+b64u(await pipe(u,new CompressionStream('deflate-raw')))}catch(e){}}
+ return '0'+b64u(u);
+}
+async function unpack(s){
+ let u=ub64(decodeURIComponent(s.slice(1)));
+ if(s[0]==='1'){if(!window.DecompressionStream)throw new Error('old');u=await pipe(u,new DecompressionStream('deflate-raw'))}
+ return JSON.parse(new TextDecoder().decode(u));
+}
+const shm=$('#shm');
+function openShare(){
+ $('#shl').textContent=L().t;
+ $('#shn').value=store.get('name','');$('#shres').hidden=true;shm.hidden=false;$('#shn').focus();
+}
+function closeShare(){shm.hidden=true;$('#share').focus()}
+$('#share').onclick=openShare;$('#shclose').onclick=closeShare;shm.onclick=e=>{if(e.target===shm)closeShare()};
+$('#shn').oninput=()=>{$('#shres').hidden=true};
+$('#shn').onkeydown=e=>{if(e.key==='Enter')$('#shgo').click()};
+$('#shgo').onclick=async()=>{
+ const n=$('#shn').value.trim().replace(/\s+/g,' ');
+ if(n.length<3){toast('Введи прізвище та ім\'я');$('#shn').focus();return}
+ store.set('name',n);
+ const o={n,l:cur,d:Date.now(),f:files.map(f=>[f[0],f[1]])};
+ $('#shu').value=location.origin+location.pathname+'#s='+await pack(o);
+ $('#shres').hidden=false;$('#shu').select();
+};
+$('#shcp').onclick=()=>copyText($('#shu').value).then(()=>toast('Посилання скопійовано'),()=>{$('#shu').select();toast('Скопіюй вручну: Ctrl+C')});
+
+async function openShared(s){
+ let o;
+ try{
+  o=await unpack(s);
+  if(!(Number.isInteger(o.l)&&o.l>=0&&o.l<N&&Array.isArray(o.f)&&o.f.length))throw 0;
+ }catch(e){toast(e&&e.message==='old'?'Онови браузер, щоб відкрити роботу':'Посилання пошкоджене');history.replaceState(null,'',location.pathname+location.search);route();return}
+ if(R.running)stopCode();
+ shared={n:String(o.n||'Без імені').slice(0,60),l:o.l,d:o.d,f:o.f.slice(0,20).map(f=>[String(f[0]||'main.py').slice(0,40),String(f[1]||'')])};
+ document.body.classList.remove('home');document.body.classList.add('sv');closeMenu();
+ cur=shared.l;files=shared.f.map(f=>[f[0],f[1]]);file=0;ta.readOnly=true;
+ renderShared();loadEditor();CON.clear();TK.reset();TT.reset();R.ui();window.scrollTo(0,0);
+ setTimeout(()=>{if(!py)loadPy().catch(()=>{})},300);
+}
+function renderShared(){
+ const l=LESSONS[shared.l],dt=shared.d?new Date(shared.d).toLocaleString('uk-UA',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
+ $('#lesson').innerHTML='<div class="card svh"><span class="meta">Робота учня</span><div class="who">'+esc(shared.n)+'</div><div class="meta">'+esc(l.t)+(dt?' · '+dt:'')+'</div>'+
+ '<div class="acts"><button class="btn pr" id="svEd">Відкрити в редакторі</button><button class="btn" id="svX">Закрити перегляд</button></div></div>'+
+ '<div class="card task"><h2>Практичне завдання</h2><p><b>'+esc(l.task)+'</b></p>'+
+ (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
+ '<h3 class="sub">Вимоги</h3><ul>'+l.ok.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>';
+ $('#lw').scrollTop=0;pgzUI(l);
+ let armed=false;
+ $('#svEd').onclick=e=>{
+  if(!armed){armed=true;e.target.textContent='Замінити мій код цього уроку?';return}
+  store.set(codeKey(shared.l),shared.f);store.set('cur',shared.l);location.hash='course';
+ };
+ $('#svX').onclick=()=>{history.pushState(null,'',location.pathname+location.search);route()};
+}
 applyUI();if(ui.lc)setLc(ui.lc);
 files=getFiles(cur);renderNav();renderLesson();loadEditor();route();
 </script>
