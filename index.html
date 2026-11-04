@@ -6554,7 +6554,7 @@ const PYLOGO='<svg viewBox="361 102 24 24" style="stroke:none"><path d="M373 103
 const GO='<svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>';
 const QUESTS=[
  {u:'https://whyuxavier.github.io/python-quiz/',t:'Python-змійка',d:'8 клас · квест з рівнями',m:0,i:PYLOGO},
- {u:'https://whyuxavier.github.io/python-quest-9/',t:'Квест «Алгоритмізація і програмування»',d:'9 клас · підсумковий квест',m:1,i:PYLOGO}];
+ {u:'https://whyuxavier.github.io/python-quest-9/',t:'Підсумковий квест: Python, 9 клас',d:'Випадкові числа, списки, словники, Turtle, Tkinter, шифри',m:1,i:PYLOGO}];
 const qcard=q=>'<a class="card qc" href="'+q.u+'" target="_blank" rel="noopener noreferrer"><span class="qi">'+q.i+'</span><span><b>'+esc(q.t)+'</b><span>'+esc(q.d)+'</span></span><span class="go">'+GO+'</span></a>';
 $('#qlist').innerHTML=QUESTS.map(qcard).join('');
 const LNK=a=>a.map(x=>'<a class="lk" href="'+x[0]+'" target="_blank" rel="noopener noreferrer"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></a>').join('');
