@@ -91,7 +91,13 @@ pre code{background:none;padding:0;font-size:inherit}
 [data-theme=dark]{--c-k:#c4a7ff;--c-b:#82aaff;--c-s:#8fd9a8;--c-c:#7a7f90;--c-n:#ffb86c;--c-f:#5ed4c8;--c-d:#ff8fb1;--c-x:#f3c97a}
 :is(#hl,pre) .k{color:var(--c-k)}:is(#hl,pre) .b{color:var(--c-b)}:is(#hl,pre) .s{color:var(--c-s)}:is(#hl,pre) .c{color:var(--c-c);font-style:italic}:is(#hl,pre) .n{color:var(--c-n)}:is(#hl,pre) .f{color:var(--c-f)}:is(#hl,pre) .d{color:var(--c-d)}:is(#hl,pre) .x{color:var(--c-x)}
 #lesson{display:flex;flex-direction:column;gap:14px}
-.lh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px}.lh h2{margin:0}
+.lh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;position:sticky;top:0;z-index:5;background:var(--sf2)}
+.lt{display:flex;gap:4px}.lt .tab{font-family:inherit;font-size:14px;font-weight:600;padding:5px 16px;min-height:34px}
+.lt .tab i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mint,#8fd1bd);margin-left:3px}
+.lp{display:flex;flex-direction:column;gap:14px}.lp[hidden]{display:none}
+.tonext{align-self:flex-end}
+body.sv .lt{visibility:hidden}
+#lw.shut .lt{visibility:hidden}
 .pane.shut{flex:none;min-height:0}.pane.shut>:not(.ph){display:none}
 #lw.shut #lesson{display:none}#lw.shut{overflow:visible}
 .cv svg{transition:transform .2s}.shut .cv svg{transform:rotate(-90deg)}
@@ -232,6 +238,7 @@ body.drag{user-select:none;cursor:col-resize}
 .tt canvas{display:block;width:100%;height:100%}
 .tt canvas+canvas{position:absolute;left:0;top:0;pointer-events:none}
 @media(max-width:1100px){
+ .lh{top:64px}
  .app{grid-template-columns:minmax(0,1fr);height:auto;min-height:100vh}
  body{overflow:auto}header{grid-column:1;position:sticky;top:0;z-index:20}
  #menu{display:grid}
@@ -341,7 +348,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
  <nav id="nav"></nav>
 </aside>
 <main>
- <section class="col" id="lw" aria-label="Урок"><div class="card lh"><h2 id="lht">Теорія та завдання</h2><button class="ib cv" data-k="lw" aria-label="Згорнути" aria-expanded="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div><div id="lesson"></div></section>
+ <section class="col" id="lw" aria-label="Урок"><div class="card lh"><div class="lt" role="tablist" aria-label="Розділ уроку" id="ltabs"><button class="tab" role="tab" id="t-th" data-t="th" aria-controls="p-th">Теорія</button><button class="tab" role="tab" id="t-tk" data-t="tk" aria-controls="p-tk">Завдання</button></div><button class="ib cv" data-k="lw" aria-label="Згорнути" aria-expanded="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div><div id="lesson"></div></section>
  <div class="rz" id="rz" role="separator" aria-orientation="vertical" aria-label="Змінити ширину панелей" tabindex="0"></div>
  <section class="ws" aria-label="Робоча область">
   <div class="pane" id="p-ed">
@@ -444,7 +451,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 <h3>Правила</h3>
 <ul>
 <li>Проходь уроки по черзі: завдання поступово ускладнюються.</li>
-<li>Прочитай теорію, розбери приклад, виконай завдання в редакторі й натисни «Запустити» (або Ctrl+Enter).</li>
+<li>Перемикайся між вкладками «Теорія» і «Завдання» (або стрілками ← →): прочитай теорію, розбери приклад, потім виконай завдання в редакторі й натисни «Запустити» (або Ctrl+Enter).</li>
 <li>Відмічай пункти чекліста. Коли все готово — «Позначити виконаним».</li>
 <li>Щоб здати роботу, натисни кнопку «Поділитися» в редакторі, скопіюй посилання і встав його у завдання в Google Classroom.</li>
 <li>Код, прогрес і тема зберігаються в цьому браузері. «Скинути код» повертає заготовку уроку.</li>
@@ -6520,12 +6527,15 @@ const PGZ_STEPS='<h4>Як запустити гру на Pygame Zero</h4><ol>'+
 function renderLesson(){
  const l=L(),d=done.includes(cur),chk=store.get('chk:'+cur,[]);
  $('#lesson').innerHTML=
+ '<div class="lp" id="p-th" role="tabpanel" aria-labelledby="t-th">'+
  '<div class="card"><h2 class="t">'+esc(l.t)+'</h2></div>'+
  '<div class="card th"><h2>Теорія</h2>'+l.th+'</div>'+
  '<div class="card"><h2>Команди та функції</h2>'+l.cm.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>'+
  '<div class="card"><div class="exh"><h2>Приклад коду</h2>'+(l.pgz||l.noRun?'':'<button class="btn" id="runEx" title="Запустити приклад">'+PLAY+'Запустити</button>')+'</div><pre><code>'+hlPy(l.ex)+'</code></pre></div>'+
  (l.how?'<div class="card"><h2>Як це працює</h2>'+l.how.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>':'')+
  (l.err?'<div class="card warn"><h2>Часті помилки</h2><ul>'+l.err.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>':'')+
+ '<button class="btn pr tonext" id="toTask">До завдання →</button></div>'+
+ '<div class="lp" id="p-tk" role="tabpanel" aria-labelledby="t-tk">'+
  '<div class="card task"><h2>Практичне завдання</h2><p><b>'+esc(l.task)+'</b></p>'+
  (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
  '<h3 class="sub">Вимоги</h3><ul class="chk">'+
@@ -6536,8 +6546,9 @@ function renderLesson(){
  (cur===N-1?$('#promo').outerHTML.replace(' id="promo"','').replace('card promo','card promo sm'):'')+
  '<div class="nav"><button class="btn" id="prev"'+(cur?'':' disabled')+'>← Назад</button><span class="sp"></span>'+
  '<button class="btn'+(d?' done':'')+'" id="mark" aria-pressed="'+d+'">'+(d?CHECK+'Виконано':'Позначити виконаним')+'</button>'+
- '<button class="btn pr" id="next">'+(cur===N-1?'На головну →':'Далі →')+'</button></div>';
- $('#lw').scrollTop=0;
+ '<button class="btn pr" id="next">'+(cur===N-1?'На головну →':'Далі →')+'</button></div></div>';
+ setTab(tabs[cur]||'th',true);
+ $('#toTask').onclick=()=>setTab('tk');
  $('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>cur===N-1?showHome():go(cur+1);
  $('#mark').onclick=()=>{done=done.includes(cur)?done.filter(x=>x!==cur):done.concat(cur);store.set('done',done);renderNav();renderLesson();toast(done.includes(cur)?'Урок завершено':'Позначку знято')};
  const re=$('#runEx');if(re)re.onclick=()=>runCode(l.ex);
@@ -6559,6 +6570,21 @@ function go(i){
  closeMenu();window.scrollTo(0,0);
 }
 $('#nav').onclick=e=>{const b=e.target.closest('.li');if(!b)return;if(b.dataset.home){closeMenu();showHome();if(b.dataset.home==='quests')setTimeout(()=>$('#quests').scrollIntoView(),50)}else go(+b.dataset.i)};
+
+/* ---------- вкладки «Теорія | Завдання» ---------- */
+const tabs=store.get('ltab',{}),tpos={};let ltab='th';
+function setTab(t,fresh){
+ const lw=$('#lw');
+ if(!fresh)tpos[ltab]=lw.scrollTop;
+ ltab=t;tabs[cur]=t;store.set('ltab',tabs);
+ document.querySelectorAll('#ltabs .tab').forEach(b=>{const on=b.dataset.t===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;b.innerHTML=(b.dataset.t==='th'?'Теорія':'Завдання')+(b.dataset.t==='tk'&&done.includes(cur)?'<i aria-label="виконано"></i>':'')});
+ document.querySelectorAll('#lesson .lp').forEach(p=>p.hidden=p.id!=='p-'+t);
+ if(fresh){tpos.th=tpos.tk=0}
+ if(matchMedia('(max-width:1100px)').matches){if(!fresh){const y=lw.getBoundingClientRect().top+scrollY-56;if(scrollY>y)scrollTo(0,y)}}
+ else lw.scrollTop=tpos[t]||0;
+}
+$('#ltabs').onclick=e=>{const b=e.target.closest('.tab');if(b&&b.dataset.t!==ltab)setTab(b.dataset.t)};
+$('#ltabs').onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setTab(ltab==='th'?'tk':'th');$('#t-'+ltab).focus()}};
 
 /* ---------- бонус ---------- */
 const TOOLS=[
