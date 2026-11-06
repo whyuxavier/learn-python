@@ -93,6 +93,12 @@ pre code{background:none;padding:0;font-size:inherit}
 #hl,#ta{position:absolute;inset:0;margin:0;padding:10px 12px;font:inherit;white-space:pre;tab-size:4;border:0;border-radius:0}
 #hl{overflow:hidden;pointer-events:none;color:var(--tx);background:none;padding-bottom:40px;padding-right:40px}
 #ta{color:transparent;caret-color:var(--tx);background:transparent;overflow:auto;resize:none;outline:0;z-index:1}
+.acl,.act{position:fixed;z-index:70;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 24px rgba(20,24,50,.16);font:13px/1.45 ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;color:var(--tx)}
+.acl{max-height:186px;overflow-y:auto;min-width:180px;max-width:min(440px,calc(100vw - 16px));padding:4px}
+.aci{display:flex;gap:8px;align-items:baseline;padding:4px 8px;border-radius:7px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aci code,.act code{background:none;padding:0;border-radius:0}.aci code{font:inherit;font-weight:600}.aci span{color:var(--mu);overflow:hidden;text-overflow:ellipsis}.aci.on{background:var(--ac);color:#fff}.aci.on span{color:rgba(255,255,255,.8)}
+.act{max-width:min(460px,calc(100vw - 16px));padding:6px 10px;pointer-events:none}.act code{font:inherit;white-space:pre-wrap}.act span{color:var(--mu)}.act b{color:var(--ac);font-weight:700}
+.act small{display:block;font:12px/1.4 "Fixel Display",system-ui,sans-serif;color:var(--mu);margin-top:2px}
 #ta::selection{background:rgba(111,138,214,.35)}
 #ta:focus-visible{outline:0;box-shadow:inset 0 0 0 2px var(--ac)}
 #eband{position:absolute;left:0;right:0;height:21px;background:rgba(208,86,106,.14);border-left:3px solid var(--er);pointer-events:none;display:none}
@@ -480,6 +486,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 <li><a href="https://osvita.ua/school/textbook/9klas/84133/" target="_blank" rel="noopener noreferrer">Ривкінд Й. Я. Інформатика, 9 клас</a></li>
 <li><a href="https://lms.e-school.net.ua/" target="_blank" rel="noopener noreferrer">Всеукраїнська школа онлайн</a></li>
 </ul>
+<div class="mode"><label class="sw" style="margin-top:0"><span>Підказки в редакторі<small>Команди й параметри під час набору коду</small></span><input type="checkbox" id="acT" role="switch"></label></div>
 <div class="mode"><h3>Мій прогрес</h3>
 <div class="row"><button class="btn" id="pSave"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Зберегти у файл</button><button class="btn" id="pLoad"><svg viewBox="0 0 24 24"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>Відкрити файл</button></div>
 <input type="file" id="pFile" accept=".json,application/json" hidden>
@@ -5859,12 +5866,14 @@ function renderTabs(){
  $('#ftabs').innerHTML=h;
 }
 function loadEditor(){
+ try{AC.hide()}catch(e){}
  ta.value=curCode();errLine=0;updateGutter();ta.scrollTop=0;renderTabs();
  ta.setAttribute('aria-label','Код '+(files[file]?files[file][0]:''));
 }
 ta.addEventListener('scroll',sync);
 ta.addEventListener('input',()=>{if(files[file])files[file][1]=ta.value;saveFiles();errLine=0;updateGutter()});
 ta.addEventListener('keydown',e=>{
+ if(AC.key(e))return;
  const s=ta.selectionStart,en=ta.selectionEnd,v=ta.value;
  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCode();return}
  if(ta.readOnly)return;
@@ -5900,6 +5909,269 @@ ta.addEventListener('keydown',e=>{
  }
 });
 function ins(t){ta.focus();if(!document.execCommand||!document.execCommand('insertText',false,t)){ta.setRangeText(t,ta.selectionStart,ta.selectionEnd,'end');ta.dispatchEvent(new Event('input'))}}
+/* ---------- Підказки в редакторі ---------- */
+const AC=(()=>{
+ // назва: 'параметри через | ; опис'. Параметр з … повторюється, з = — іменований.
+ const P=o=>{const r={};for(const k in o){const [p,d]=o[k].split(' ; ');r[k]={p:p?p.split('|'):[],d:d||''}}return r};
+ const PROP=o=>{const r={};for(const k in o)r[k]={prop:1,d:o[k]};return r};
+ const KW='False None True and as break continue def elif else for from global if import in is not or pass return while lambda try except finally with del'.split(' ');
+ const B=P({
+  print:'значення…|sep=" "|end="\\n" ; виводить значення в консоль',
+  input:'підказка ; чекає введення, завжди повертає рядок',
+  int:'значення ; перетворює на ціле число',float:'значення ; перетворює на дробове число',
+  str:'значення ; перетворює на рядок',bool:'значення ; True або False',
+  len:'послідовність ; кількість елементів або символів',
+  range:'start|stop|step ; range(5) → 0…4, range(1, 6) → 1…5',
+  abs:'x ; модуль числа',round:'число|знаків ; округлення',
+  max:'значення… ; найбільше',min:'значення… ; найменше',sum:'список ; сума елементів',
+  sorted:'список|reverse=False ; новий відсортований список',type:'значення ; тип значення',
+  list:'послідовність ; створює список',dict:' ; створює словник',
+  enumerate:'список ; пари (номер, елемент)',ord:'символ ; код символу',chr:'код ; символ за кодом',
+  isinstance:'значення|тип ; чи має значення цей тип'
+ });
+ const MOD={
+  random:P({randint:'a|b ; випадкове ціле від a до b',random:' ; випадкове число від 0 до 1',choice:'список ; випадковий елемент',shuffle:'список ; перемішує список',randrange:'start|stop|step ; випадкове з range',uniform:'a|b ; випадкове дробове від a до b'}),
+  time:P({sleep:'секунди ; пауза',time:' ; поточний час у секундах'}),
+  math:Object.assign(P({sqrt:'x ; квадратний корінь',floor:'x ; округлення вниз',ceil:'x ; округлення вгору',pow:'x|y ; x у степені y'}),PROP({pi:'число π'})),
+  tkinter:P({
+   Tk:' ; головне вікно',
+   Label:'вікно|text=|font=|fg=|bg=|width=|height= ; напис',
+   Button:'вікно|text=|command=|font=|fg=|bg=|width=|height= ; кнопка; command — функція без дужок',
+   Entry:'вікно|width=|font=|justify= ; поле для одного рядка',
+   Canvas:'вікно|width=|height=|bg= ; полотно для малювання',
+   Frame:'вікно|bg=|padx=|pady= ; рамка для групи віджетів',
+   Text:'вікно|width=|height=|font= ; багаторядкове поле',
+   Radiobutton:'вікно|text=|variable=|value=|command= ; перемикач',
+   Checkbutton:'вікно|text=|variable=|command= ; прапорець',
+   StringVar:'value= ; змінна-рядок для віджетів',IntVar:'value= ; змінна-число для віджетів',BooleanVar:'value= ; змінна True/False для віджетів',
+   PhotoImage:'file= ; картинка з файлу'
+  }),
+  font:P({Font:'family=|size=|weight=|slant=|underline=|overstrike= ; об\'єкт шрифту'}),
+  messagebox:P({showinfo:'заголовок|повідомлення ; вікно з повідомленням',showwarning:'заголовок|повідомлення ; попередження',showerror:'заголовок|повідомлення ; помилка',askyesno:'заголовок|питання ; так → True, ні → False'}),
+  turtle:P({
+   Turtle:' ; нова черепашка',Screen:' ; вікно черепашки',done:' ; залишити вікно відкритим',mainloop:' ; залишити вікно відкритим',
+   bgcolor:'колір ; колір фону',onkey:'функція|клавіша ; реакція на клавішу',listen:' ; слухати клавіатуру',
+   onscreenclick:'функція ; реакція на клік (x, y)',ontimer:'функція|мс ; виклик через час',exitonclick:' ; закрити кліком',
+   tracer:'n ; 0 — малювати миттєво',update:' ; перемалювати'
+  })
+ };
+ const WID=P({config:'параметр=значення… ; змінити властивості',configure:'параметр=значення… ; змінити властивості',
+  place:'relx=|rely=|anchor=|x=|y= ; розмістити: relx, rely — від 0 до 1',pack:'side=|padx=|pady=|fill=|expand= ; розмістити один за одним',
+  grid:'row=|column=|padx=|pady=|columnspan=|sticky= ; розмістити в таблиці',bind:'подія|функція ; "<Enter>", "<Button-1>", "<Key>"…',
+  cget:'параметр ; поточне значення властивості',place_forget:' ; сховати',pack_forget:' ; сховати',grid_forget:' ; сховати',
+  destroy:' ; видалити',after:'мс|функція ; виклик функції через час'});
+ const T={
+  tk:Object.assign(P({title:'текст ; заголовок вікна',geometry:'"ШxВ+x+y" ; розмір і положення: "400x300"',mainloop:' ; запустити вікно (останній рядок)',
+   configure:'bg= ; колір фону вікна',config:'bg= ; колір фону вікна',resizable:'ширина|висота ; чи можна змінювати розмір',update:' ; перемалювати вікно',
+   after:'мс|функція ; виклик функції через час',bind:'подія|функція ; реакція на подію',bind_all:'подія|функція ; подія для всього вікна',destroy:' ; закрити вікно'})),
+  widget:WID,
+  entry:Object.assign({},WID,P({get:' ; текст із поля (рядок)',delete:'початок|кінець ; delete(0, "end") — очистити',insert:'позиція|текст ; вставити текст',focus:' ; поставити курсор у поле'})),
+  canvas:Object.assign({},WID,P({
+   create_oval:'x1|y1|x2|y2|fill=|outline=|width= ; овал у прямокутнику (x1, y1)–(x2, y2)',
+   create_rectangle:'x1|y1|x2|y2|fill=|outline=|width= ; прямокутник',
+   create_line:'x1|y1|x2|y2…|fill=|width=|smooth= ; лінія через точки',
+   create_polygon:'x1|y1|x2|y2|x3|y3…|fill=|outline=|smooth= ; многокутник',
+   create_text:'x|y|text=|font=|fill=|anchor= ; текст',create_image:'x|y|image=|anchor= ; картинка',
+   create_arc:'x1|y1|x2|y2|start=|extent=|fill= ; дуга або сектор',
+   move:'фігура|dx|dy ; зсунути: dx праворуч, dy вниз',coords:'фігура|x1|y1… ; координати фігури',
+   itemconfig:'фігура|fill=|state=|text= ; змінити фігуру; state="hidden" — сховати',
+   delete:'фігура ; видалити фігуру',bind_all:'подія|функція ; "<Key>", "<Up>", "<Button-1>"…'})),
+  vars:P({get:' ; значення змінної',set:'значення ; записати значення'}),
+  event:PROP({widget:'віджет, з яким сталася подія',keysym:'назва клавіші: "Up", "space", "a"',char:'введений символ',x:'x курсора',y:'y курсора',num:'номер кнопки миші'}),
+  turtle:P({forward:'відстань ; вперед',fd:'відстань ; вперед',backward:'відстань ; назад',back:'відстань ; назад',left:'кут ; поворот ліворуч',lt:'кут ; ліворуч',
+   right:'кут ; поворот праворуч',rt:'кут ; праворуч',goto:'x|y ; перейти в точку',penup:' ; підняти перо',pendown:' ; опустити перо',up:' ; підняти перо',down:' ; опустити перо',
+   color:'колір_лінії|колір_заливки ; кольори',pencolor:'колір ; колір лінії',fillcolor:'колір ; колір заливки',begin_fill:' ; почати заливку',end_fill:' ; завершити заливку',
+   circle:'радіус|extent= ; коло або дуга',dot:'розмір|колір ; крапка',pensize:'товщина ; товщина лінії',width:'товщина ; товщина лінії',speed:'0–10 ; швидкість (0 — найшвидше)',
+   shape:'"turtle" ; форма: turtle, circle, arrow…',hideturtle:' ; сховати черепашку',showturtle:' ; показати черепашку',setheading:'кут ; напрямок: 0 — праворуч, 90 — вгору',
+   write:'текст|font= ; написати текст',stamp:' ; відбиток',home:' ; у центр',clear:' ; стерти малюнок',xcor:' ; координата x',ycor:' ; координата y',
+   onclick:'функція ; клік по черепашці',ondrag:'функція ; перетягування'}),
+  str:P({upper:' ; ВЕЛИКІ ЛІТЕРИ',lower:' ; малі літери',strip:' ; прибрати пробіли з країв',split:'роздільник=" " ; розбити на список',
+   replace:'старе|нове ; замінити',find:'підрядок ; позиція або -1',count:'підрядок ; скільки разів',startswith:'початок ; чи починається',endswith:'кінець ; чи закінчується',
+   join:'список ; з\'єднати список у рядок',isdigit:' ; лише цифри?',isalpha:' ; лише літери?',capitalize:' ; Перша велика',title:' ; Кожне Слово З Великої'}),
+  list:P({append:'елемент ; додати в кінець',insert:'позиція|елемент ; вставити',remove:'елемент ; видалити перше входження',pop:'позиція=-1 ; забрати й повернути',
+   sort:'reverse=False ; відсортувати',reverse:' ; у зворотному порядку',index:'елемент ; позиція елемента',count:'елемент ; скільки разів',clear:' ; очистити',copy:' ; копія',extend:'список ; додати всі елементи'}),
+  dict:P({keys:' ; ключі',values:' ; значення',items:' ; пари (ключ, значення)',get:'ключ|за_замовчуванням ; значення або запасне',pop:'ключ ; забрати й повернути',update:'словник ; додати пари',clear:' ; очистити'})
+ };
+ T.screen=Object.assign({},MOD.turtle,P({setup:'ширина|висота ; розмір вікна',title:'текст ; заголовок вікна'}));
+ delete T.screen.Turtle;delete T.screen.Screen;
+ Object.assign(MOD.tkinter,{messagebox:{prop:1,d:'модуль повідомлень'},font:{prop:1,d:'модуль шрифтів'}});
+ const TURTLE_FN=Object.assign({},T.turtle,MOD.turtle);   // from turtle import * / turtle.forward()
+ MOD.turtle=TURTLE_FN;
+ const CLS={Tk:'tk',Toplevel:'tk',Label:'widget',Button:'widget',Frame:'widget',Radiobutton:'widget',Checkbutton:'widget',Entry:'entry',Text:'entry',Canvas:'canvas',
+  StringVar:'vars',IntVar:'vars',BooleanVar:'vars',DoubleVar:'vars',Turtle:'turtle',Screen:'screen',input:'str',str:'str',list:'list',sorted:'list',dict:'dict'};
+ const MODNAMES=['random','time','math','tkinter','turtle'];
+
+ /* ---- аналіз коду учня ---- */
+ function scan(code){
+  const g={},alias={},types={},defs={};
+  Object.keys(B).forEach(k=>g[k]=B[k]);
+  for(const m of code.matchAll(/^[ \t]*import[ \t]+([\w.]+)(?:[ \t]+as[ \t]+(\w+))?/gm)){const n=m[1].replace(/^tkinter\./,'');if(MOD[n])alias[m[2]||m[1].split('.').pop()]=n}
+  for(const m of code.matchAll(/^[ \t]*from[ \t]+([\w.]+)[ \t]+import[ \t]+([^\n#]+)/gm)){
+   const n=m[1].replace(/^tkinter\./,''),M=MOD[n];if(!M)continue;
+   if(m[2].trim()==='*')Object.assign(g,M);
+   else m[2].replace(/[()]/g,'').split(',').forEach(x=>{const [a,b]=x.trim().split(/\s+as\s+/);if(!a)return;if(MOD[a]&&M[a]&&M[a].prop)alias[b||a]=a;else if(M[a])g[b||a]=M[a]})
+  }
+  for(const m of code.matchAll(/^[ \t]*def[ \t]+(\w+)[ \t]*\(([^)]*)\)/gm)){
+   const ps=m[2].split(',').map(s=>s.trim()).filter(Boolean);defs[m[1]]={p:ps,d:'твоя функція',own:1};
+   ps.forEach(p=>{const n=p.split('=')[0].trim();if(/^(event|e|ev|evt)$/.test(n))types[n]='event'});
+  }
+  for(const m of code.matchAll(/^[ \t]*(\w+)[ \t]*=(?!=)[ \t]*(?:(\w+)\.)?(\w+)?[ \t]*([(\["'{]|f["']|\d)?/gm)){
+   const [,v,,c,ch]=m;
+   if(c&&ch==='('&&CLS[c])types[v]=CLS[c];
+   else if(!c&&ch&&/^["'f]/.test(ch))types[v]='str';
+   else if(!c&&ch==='[')types[v]='list';
+   else if(!c&&ch==='{')types[v]='dict';
+  }
+  const vars=new Set();
+  for(const m of code.matchAll(/^[ \t]*(\w+)[ \t]*(?:=(?!=)|\+=|-=)/gm))vars.add(m[1]);
+  for(const m of code.matchAll(/\bfor[ \t]+(\w+)(?:[ \t]*,[ \t]*(\w+))?[ \t]+in\b/g)){vars.add(m[1]);if(m[2])vars.add(m[2])}
+  for(const m of code.matchAll(/\b(?:global|def\s+\w+\s*\()([^):\n]*)/g))m[1].split(',').forEach(x=>{const n=x.split('=')[0].trim();if(/^\w+$/.test(n))vars.add(n)});
+  return {g,alias,types,defs,vars};
+ }
+ function members(obj,S){
+  if(S.alias[obj])return MOD[S.alias[obj]];
+  if(S.types[obj])return T[S.types[obj]];
+  if(MOD[obj]&&S.g[obj])return MOD[obj];
+  return null;
+ }
+ function lookup(callee,S){
+  const i=callee.lastIndexOf('.');
+  if(i<0)return S.defs[callee]||S.g[callee]||null;
+  const obj=callee.slice(0,i).split('.').pop(),name=callee.slice(i+1),M=members(obj,S);
+  if(M)return M[name]||null;
+  for(const k of ['canvas','entry','tk','turtle','str','list','dict'])if(T[k][name]&&!T[k][name].prop)return T[k][name];
+  return null;
+ }
+
+ /* ---- стан тексту до курсора: рядок/коментар, відкриті дужки ---- */
+ function ctx(text){
+  const st=[];let q=null,i=0,com=false;
+  for(;i<text.length;i++){
+   const c=text[i];
+   if(com){if(c==='\n')com=false;continue}
+   if(q){if(c==='\\'){i++;continue}if(text.startsWith(q,i)){i+=q.length-1;q=null}else if(c==='\n'&&q.length===1)q=null;continue}
+   if(c==='#'){com=true;continue}
+   if(c==='"'||c==="'"){q=text.startsWith(c.repeat(3),i)?c.repeat(3):c;if(q.length===3)i+=2;continue}
+   if(c==='('||c==='['||c==='{'){const m=c==='('&&/([A-Za-z_][\w.]*)\s*$/.exec(text.slice(Math.max(0,i-60),i));st.push({c,callee:m?m[1]:'',arg:0,start:i+1});continue}
+   if(c===')'||c===']'||c==='}'){st.pop();continue}
+   if(c===','&&st.length){const t=st[st.length-1];t.arg++;t.start=i+1}
+  }
+  let f=null;for(let k=st.length-1;k>=0;k--)if(st[k].c==='('){f=st[k];break}
+  return {inStr:!!q,inCom:com,frame:f};
+ }
+
+ /* ---- інтерфейс ---- */
+ let on=true;try{on=localStorage.getItem('lpy:ac')!=='0'}catch(e){}
+ const box=document.createElement('div');box.className='acl';box.hidden=true;box.setAttribute('role','listbox');
+ const tip=document.createElement('div');tip.className='act';tip.hidden=true;
+ document.body.append(box,tip);
+ let items=[],sel=0,moved=false,rng=null,cw=0;
+ const charW=()=>{if(cw)return cw;const c=document.createElement('canvas').getContext('2d');c.font=getComputedStyle(ta).font;cw=c.measureText('M'.repeat(20)).width/20||8.4;return cw};
+ function caretXY(){
+  const s=ta.selectionStart,v=ta.value,ls=v.lastIndexOf('\n',s-1)+1,line=(v.slice(0,s).match(/\n/g)||[]).length,r=ta.getBoundingClientRect();
+  const cs=getComputedStyle(ta),lh=parseFloat(cs.lineHeight)||21;
+  return {x:r.left+parseFloat(cs.paddingLeft)+(s-ls)*charW()-ta.scrollLeft,y:r.top+parseFloat(cs.paddingTop)+line*lh-ta.scrollTop,lh,r};
+ }
+ function place(el,below){
+  const c=caretXY();if(c.y<c.r.top-c.lh||c.y>c.r.bottom){el.hidden=true;return}
+  el.style.left='0px';el.style.top='0px';
+  const w=el.offsetWidth,h=el.offsetHeight,vw=document.documentElement.clientWidth;
+  let x=Math.max(8,Math.min(c.x-4,vw-w-8)),y=below?c.y+c.lh+2:c.y-h-4;
+  if(!below&&y<4)y=c.y+c.lh+2+(box.hidden?0:box.offsetHeight+4);
+  if(below&&y+h>innerHeight-4)y=c.y-h-4-(tip.hidden?0:tip.offsetHeight+4);
+  el.style.left=x+'px';el.style.top=y+'px';
+ }
+ const hideList=()=>{box.hidden=true;items=[]};
+ const hide=()=>{hideList();tip.hidden=true};
+ function sigHTML(s,name,fr,cur){
+  const ps=s.p;let a=fr.arg;
+  const kw=/^\s*(\w+)\s*=(?!=)/.exec(cur);let act=-1;
+  if(kw)act=ps.findIndex(p=>p.split('=')[0].replace('…','')===kw[1]);
+  else{const pos=ps.filter(p=>!p.endsWith('=')&&!/^\w+=/.test(p));
+   if(!pos.length)act=a<ps.length?a:-1;else if(a<pos.length)act=ps.indexOf(pos[a]);else{const r=pos.findIndex(p=>p.endsWith('…'));if(r>=0)act=ps.indexOf(pos[r])}}
+  return '<code>'+esc(name)+'(<span>'+ps.map((p,i)=>i===act?'<b>'+esc(p)+'</b>':esc(p)).join(', ')+'</span>)</code>'+(s.d?'<small>'+esc(s.d)+'</small>':'');
+ }
+ function updateTip(S){
+  const s=ta.selectionStart;if(s!==ta.selectionEnd){tip.hidden=true;return}
+  const before=ta.value.slice(Math.max(0,s-3000),s),c=ctx(before);
+  const fr=c.frame;if(!fr||!fr.callee){tip.hidden=true;return}
+  const sg=lookup(fr.callee,S||scan(ta.value));if(!sg||sg.prop){tip.hidden=true;return}
+  tip.innerHTML=sigHTML(sg,fr.callee.split('.').pop(),fr,before.slice(fr.start));
+  tip.hidden=false;place(tip,false);
+ }
+ function updateList(S){
+  const s=ta.selectionStart,v=ta.value;if(s!==ta.selectionEnd){hideList();return}
+  const ls=v.lastIndexOf('\n',s-1)+1,line=v.slice(ls,s),c=ctx(v.slice(Math.max(0,s-3000),s));
+  if(c.inStr||c.inCom||/^\s*(def|class)\s+\w*$/.test(line)||/\d\w*$/.test(line)&&!/[A-Za-z_]\w*$/.test(line)){hideList();return}
+  let m,pref,cand=[];
+  if((m=/^\s*(import|from)\s+(\w*)$/.exec(line))){pref=m[2];cand=MODNAMES.map(n=>[n,{prop:1,d:'модуль'}])}
+  else if((m=/^\s*from\s+([\w.]+)\s+import\s+(?:.*,\s*)?(\w*)$/.exec(line))){const M=MOD[m[1].replace(/^tkinter\./,'')];if(!M){hideList();return}pref=m[2];cand=Object.entries(M)}
+  else if((m=/([A-Za-z_]\w*)\.(\w*)$/.exec(line))){
+   pref=m[2];const M=members(m[1],S);
+   if(M)cand=Object.entries(M);
+   else if(pref.length){const seen={};for(const k of ['widget','entry','canvas','tk','str','list','dict','turtle'])for(const [n,x] of Object.entries(T[k]))if(!seen[n])seen[n]=x;cand=Object.entries(seen)}
+  }
+  else if((m=/(?:^|[^\w.])([A-Za-z_]\w*)$/.exec(line))){
+   pref=m[1];if(pref.length<2&&!c.frame){hideList();return}
+   const seen=new Map();
+   Object.entries(S.defs).forEach(([n,x])=>seen.set(n,x));
+   S.vars.forEach(n=>{if(!seen.has(n))seen.set(n,{prop:1,d:'змінна'})});
+   Object.keys(S.alias).forEach(n=>{if(!seen.has(n))seen.set(n,{prop:1,d:'модуль'})});
+   Object.entries(S.g).forEach(([n,x])=>{if(!seen.has(n))seen.set(n,x)});
+   KW.forEach(n=>{if(!seen.has(n))seen.set(n,{kw:1,d:''})});
+   cand=[...seen];
+   const fr=c.frame,sg=fr&&fr.callee&&lookup(fr.callee,S);
+   if(sg&&sg.p)sg.p.filter(x=>/^\w+=$/.test(x)).forEach(x=>cand.unshift([x,{prop:1,arg:1,d:'параметр'}]));
+   if(pref.length<2)cand=cand.filter(x=>x[1].arg);
+  }else{hideList();return}
+  const low=pref.toLowerCase();
+  items=cand.filter(([n])=>n.toLowerCase().startsWith(low)&&n!==pref).sort((a,b)=>(b[1].arg?2:b[1].own?1:0)-(a[1].arg?2:a[1].own?1:0)||a[0].length-b[0].length||a[0].localeCompare(b[0])).slice(0,30);
+  if(!items.length){hideList();return}
+  rng=[s-pref.length,s];sel=0;moved=false;render();
+ }
+ function render(){
+  box.innerHTML=items.map(([n,x],i)=>'<div class="aci'+(i===sel?' on':'')+'" data-i="'+i+'" role="option"><code>'+esc(n)+'</code>'+(x.p?'<span>('+esc(x.p.join(', '))+')</span>':'')+'</div>').join('');
+  box.hidden=false;place(box,true);
+  const a=box.children[sel];if(a)a.scrollIntoView({block:'nearest'});
+ }
+ let busy=false;
+ function accept(i){
+  const [n,x]=items[i];hideList();
+  busy=true;ta.setSelectionRange(rng[0],rng[1]);
+  const call=x.p&&!x.prop&&!x.kw&&ta.value[rng[1]]!=='(';
+  ins(call?n+'()':n);if(call)ta.setSelectionRange(ta.selectionStart-1,ta.selectionStart-1);
+  busy=false;refresh(false);
+ }
+ function refresh(list){
+  if(!on||ta.readOnly){hide();return}
+  const S=scan(ta.value);
+  if(list)updateList(S);else if(!box.hidden)updateList(S);
+  updateTip(S);
+ }
+ ta.addEventListener('input',e=>{if(busy)return;const d=e.data;refresh(e.inputType==='insertText'&&d&&/[\w.]$/.test(d)||e.inputType==='deleteContentBackward'&&!box.hidden)});
+ ta.addEventListener('click',()=>{hideList();refresh(false)});
+ ta.addEventListener('keyup',e=>{if(/^(Arrow(Left|Right)|Home|End)$/.test(e.key)){hideList();refresh(false)}});
+ ta.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==ta)hide()},150));
+ ta.addEventListener('scroll',()=>{if(!box.hidden)place(box,true);if(!tip.hidden)place(tip,false)});
+ addEventListener('resize',hide);
+ box.addEventListener('pointerdown',e=>{e.preventDefault();const r=e.target.closest('.aci');if(r)accept(+r.dataset.i)});
+ return {
+  key(e){
+   if(!on)return false;
+   if(!box.hidden&&items.length){
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();sel=(sel+(e.key==='ArrowDown'?1:items.length-1))%items.length;moved=true;render();return true}
+    if(e.key==='Tab'&&!e.shiftKey||e.key==='Enter'&&moved){e.preventDefault();accept(sel);return true}
+    if(e.key==='Escape'){e.preventDefault();hideList();return true}
+    if(e.key==='Enter')hideList();
+   }
+   if(e.key==='Escape'&&!tip.hidden){e.preventDefault();tip.hidden=true;return true}
+   return false;
+  },
+  hide,
+  get on(){return on},
+  set on(v){on=v;try{localStorage.setItem('lpy:ac',v?'1':'0')}catch(e){}if(!v)hide()}
+ };
+})();
 $('#ftabs').onclick=e=>{
  const d=e.target.closest('[data-del]');
  if(d){e.stopPropagation();const i=+d.dataset.del;if(!confirm('Видалити файл '+files[i][0]+'?'))return;files.splice(i,1);file=0;saveFiles();loadEditor();return}
@@ -6880,6 +7152,7 @@ rz.ondblclick=()=>{mainEl.style.removeProperty('--lc');delete ui.lc;store.set('u
 /* ---------- прогрес: файл і шкільний режим ---------- */
 $('#schB').hidden=!SCH;$('#schB').onclick=()=>openInfo();
 $('#schT').checked=SCH;
+$('#acT').checked=AC.on;$('#acT').onchange=e=>{AC.on=e.target.checked};
 $('#schT').onchange=e=>{try{if(e.target.checked){localStorage.setItem(SKEY,'1');wipe(localStorage)}else localStorage.removeItem(SKEY)}catch(x){}location.reload()};
 $('#pSave').onclick=()=>{
  const data={};keysOf(ST).forEach(k=>{data[k.slice(K.length)]=ST.getItem(k)});
