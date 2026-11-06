@@ -48,6 +48,9 @@ aside{background:var(--sf);backdrop-filter:blur(12px);border-right:1px solid var
 .pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--mint));transition:width .3s}
 .pc{display:flex;justify-content:space-between;color:var(--mu);font-size:13px;margin-bottom:14px}
 .mod{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:16px 6px 6px}
+button.mod{display:flex;align-items:center;justify-content:space-between;width:calc(100% - 12px);border:0;background:none;padding:2px 0;font-family:inherit;text-align:left;border-radius:6px}
+button.mod:hover{color:var(--tx)}button.mod svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+button.mod[aria-expanded=false] svg{transform:rotate(-90deg)}
 .li{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:10px;font-size:14px;line-height:1.35}
 .li:hover{background:var(--sf2)}
 .li[aria-current=true]{background:var(--sf2);box-shadow:inset 3px 0 0 var(--ac);font-weight:600}
@@ -5797,6 +5800,7 @@ function setTheme(t){document.documentElement.dataset.theme=t;$('#theme').innerH
 $('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 setTheme(store.get('theme',matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
 const MODS=['8 клас','9 клас'];
+let fold=store.get('fold',[]);
 const MODT=['Основи Python і графічний інтерфейс','Списки, рядки, словники, функції та ігри'];
 const modOf=i=>i<16?0:1;
 const numIn=i=>i<16?i+1:i-15;
@@ -6698,7 +6702,8 @@ const TT={
 function renderNav(){
  let h='',last=-1;
  LESSONS.forEach((l,i)=>{
-  if(modOf(i)!==last){last=modOf(i);h+='<div class="mod">'+MODS[last]+'</div>'}
+  if(modOf(i)!==last){last=modOf(i);const o=!fold.includes(last);h+='<button class="mod" data-m="'+last+'" aria-expanded="'+o+'" title="'+(o?'Згорнути':'Розгорнути')+' уроки">'+MODS[last]+'<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>'}
+  if(fold.includes(last))return;
   h+='<button class="li'+(done.includes(i)?' d':'')+'" data-i="'+i+'" aria-current="'+(i===cur)+'"><b>'+CHECK+'</b><span>'+numIn(i)+'. '+esc(l.s||l.t)+'</span></button>';
  });
  h+='<div class="mod">Головна</div><button class="li bn" data-home="1"><b>'+STAR+'</b><span>Програма курсу і бонус</span></button><button class="li bn" data-home="quests"><b>'+STAR+'</b><span>Квести й тести</span></button>';
@@ -6755,13 +6760,14 @@ function pgzUI(l){
 }
 function go(i){
  if(i<0||i>=N)return;
+ if(fold.includes(modOf(i))){fold=fold.filter(x=>x!==modOf(i));store.set('fold',fold)}
  if(R.running)stopCode();
  cur=i;store.set('cur',i);file=0;files=getFiles(i);
  renderNav();renderLesson();loadEditor();
  CON.clear();TK.reset();TT.reset();R.ui();
  closeMenu();window.scrollTo(0,0);
 }
-$('#nav').onclick=e=>{const b=e.target.closest('.li');if(!b)return;if(b.dataset.home){closeMenu();showHome();if(b.dataset.home==='quests')setTimeout(()=>$('#quests').scrollIntoView(),50)}else go(+b.dataset.i)};
+$('#nav').onclick=e=>{const m=e.target.closest('.mod[data-m]');if(m){const k=+m.dataset.m;fold=fold.includes(k)?fold.filter(x=>x!==k):fold.concat(k);store.set('fold',fold);renderNav();return}const b=e.target.closest('.li');if(!b)return;if(b.dataset.home){closeMenu();showHome();if(b.dataset.home==='quests')setTimeout(()=>$('#quests').scrollIntoView(),50)}else go(+b.dataset.i)};
 
 /* ---------- вкладки «Теорія | Завдання» ---------- */
 const tabs=store.get('ltab',{}),tpos={};let ltab='th';
