@@ -331,6 +331,16 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
  .mods{grid-template-columns:1fr}
 }
 @media(max-width:520px){.hm{padding:0 16px 24px}.ld{font-size:16px}.btn.lg{flex:1 1 100%;justify-content:center}}
+.sch{color:var(--ac)}.sch[hidden]{display:none}
+.mode{margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
+.mode .row{display:flex;gap:8px;flex-wrap:wrap}.mode .row .btn{flex:1 1 150px;justify-content:center;margin-top:0}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;cursor:pointer}
+.sw small{display:block;color:var(--mu);font-size:13px}
+.sw input{appearance:none;flex:none;width:42px;height:24px;border-radius:12px;background:var(--bd);position:relative;cursor:pointer;transition:.2s;margin:0}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+.sw input:checked{background:var(--ac)}.sw input:checked::after{left:21px}
+.sw input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.sw input,.sw input::after{transition:none}}
 </style>
 </head>
 <body class="home">
@@ -339,6 +349,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
  <button class="ib" id="menu" aria-label="Меню курсу" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
  <h1><button id="logo" title="На головну">Python з нуля</button></h1>
  <button class="ib" id="homeBtn" aria-label="На головну" title="На головну"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/></svg></button>
+ <button class="ib sch" id="schB" hidden aria-label="Шкільний режим увімкнено" title="Шкільний режим: прогрес зникне після закриття браузера"><svg viewBox="0 0 24 24"><path d="M3 10l9-5 9 5-9 5z"/><path d="M7 12.5V17c0 1.2 2.2 2.5 5 2.5s5-1.3 5-2.5v-4.5"/></svg></button>
  <button class="ib" id="info" aria-label="Про курс" title="Про курс"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
  <button class="ib" id="theme" aria-label="Змінити тему"></button>
 </header>
@@ -463,6 +474,10 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 <li><a href="https://osvita.ua/school/textbook/9klas/84133/" target="_blank" rel="noopener noreferrer">Ривкінд Й. Я. та ін. Інформатика. 9 клас (НУШ)</a></li>
 <li><a href="https://lms.e-school.net.ua/" target="_blank" rel="noopener noreferrer">Всеукраїнська школа онлайн (ВШО)</a></li>
 </ul>
+<div class="mode"><h3>Мій прогрес</h3>
+<div class="row"><button class="btn" id="pSave"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Зберегти у файл</button><button class="btn" id="pLoad"><svg viewBox="0 0 24 24"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>Відкрити файл</button></div>
+<input type="file" id="pFile" accept=".json,application/json" hidden>
+<label class="sw"><span>Шкільний комп'ютер<small>Прогрес зникає після закриття браузера</small></span><input type="checkbox" id="schT" role="switch"></label></div>
 <a class="btn gh" href="https://github.com/whyuxavier/learn-python" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/></svg>Репозиторій на GitHub</a>
 <p>Автор сайту: <a href="https://github.com/whyuxavier" target="_blank" rel="noopener noreferrer">whyuxavier</a></p></div></div>
 <div class="modal" id="shm" hidden role="dialog" aria-modal="true" aria-labelledby="sht"><div class="card mc">
@@ -5584,10 +5599,21 @@ Object.entries(EXTRA).forEach(([i,o])=>Object.assign(LESSONS[+i],o));
 'use strict';
 /* ---------- стан і сховище ---------- */
 const K='lpy:';
+/* шкільний режим: прогрес у sessionStorage (зникає після закриття браузера) */
+const SKEY=K+'school';
+function keysOf(st){const a=[];try{for(let i=0;i<st.length;i++){const k=st.key(i);if(k&&k.startsWith(K)&&k!==SKEY)a.push(k)}}catch(e){}return a}
+function wipe(st){keysOf(st).forEach(k=>{try{st.removeItem(k)}catch(e){}})}
+const SCH=(()=>{try{
+ const u=new URL(location.href),q=u.searchParams.get('school');
+ if(q==='1'){localStorage.setItem(SKEY,'1');wipe(localStorage)}
+ if(q==='0')localStorage.removeItem(SKEY);
+ if(q!==null){u.searchParams.delete('school');history.replaceState(null,'',u.pathname+u.search+u.hash)}
+ return localStorage.getItem(SKEY)==='1'}catch(e){return false}})();
+const ST=(()=>{try{return SCH?sessionStorage:localStorage}catch(e){return null}})();
 const store={
- get(k,d){try{const v=localStorage.getItem(K+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
- set(k,v){try{localStorage.setItem(K+k,JSON.stringify(v))}catch(e){}},
- del(k){try{localStorage.removeItem(K+k)}catch(e){}}
+ get(k,d){try{const v=ST.getItem(K+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+ set(k,v){try{ST.setItem(K+k,JSON.stringify(v))}catch(e){}},
+ del(k){try{ST.removeItem(K+k)}catch(e){}}
 };
 const N=LESSONS.length;
 if(store.get('ver',1)<2){for(let i=16;i<32;i++){store.del('code:'+i);store.del('chk:'+i)}store.set('ver',2)}
@@ -6679,6 +6705,23 @@ rz.onpointerdown=e=>{
 };
 rz.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setLc($('#lw').getBoundingClientRect().width+(e.key==='ArrowRight'?24:-24));store.set('ui',ui)}};
 rz.ondblclick=()=>{mainEl.style.removeProperty('--lc');delete ui.lc;store.set('ui',ui)};
+/* ---------- прогрес: файл і шкільний режим ---------- */
+$('#schB').hidden=!SCH;$('#schB').onclick=()=>openInfo();
+$('#schT').checked=SCH;
+$('#schT').onchange=e=>{try{if(e.target.checked){localStorage.setItem(SKEY,'1');wipe(localStorage)}else localStorage.removeItem(SKEY)}catch(x){}location.reload()};
+$('#pSave').onclick=()=>{
+ const data={};keysOf(ST).forEach(k=>{data[k.slice(K.length)]=ST.getItem(k)});
+ const d=new Date(),dt=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ const b=new Blob([JSON.stringify({app:K,v:1,d:Date.now(),data})],{type:'application/json'});
+ const l=document.createElement('a');l.href=URL.createObjectURL(b);l.download='learn-python-progres-'+dt+'.json';
+ document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(l.href),1000);toast('Прогрес збережено у файл');
+};
+$('#pLoad').onclick=()=>$('#pFile').click();
+$('#pFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ f.text().then(t=>{const j=JSON.parse(t);if(!j||j.app!==K||typeof j.data!=='object')throw 0;
+  wipe(ST);Object.keys(j.data).forEach(k=>{try{ST.setItem(K+k,String(j.data[k]))}catch(x){}});location.reload()})
+ .catch(()=>toast('Це не файл прогресу цього курсу'));
+};
 $('#info').onclick=openInfo;$('#mclose').onclick=closeInfo;modal.onclick=e=>{if(e.target===modal)closeInfo()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();if(!modal.hidden)closeInfo();if(!shm.hidden)closeShare()}});
 
