@@ -452,7 +452,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
   <span class="btn pr pgo">Відкрити курс<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
  </a></section>
  <section class="sec" aria-labelledby="bh"><h3 id="bh">Бонус</h3><p>Інструменти для програмування та безкоштовні відеокурси з Python українською.</p><div class="hcards" id="bonus"></div></section>
- <footer class="hf"><span>Python з нуля · learn-python</span><a href="https://github.com/whyuxavier/learn-python" target="_blank" rel="noopener noreferrer">GitHub — whyuxavier/learn-python</a></footer>
+ <footer class="hf"><span>Python з нуля</span><a href="https://github.com/whyuxavier/learn-python" target="_blank" rel="noopener noreferrer">GitHub — whyuxavier/learn-python</a></footer>
 </div>
 </div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mt"><div class="card mc">
@@ -462,15 +462,14 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 <h3>Правила</h3>
 <ul>
 <li>Проходь уроки по черзі.</li>
-<li>Прочитай «Теорію», виконай «Завдання» і натисни «Запустити» (Ctrl+Enter).</li>
-<li>Відмічай чекліст, потім — «Позначити виконаним».</li>
-<li>Здати роботу: «Поділитися» → посилання в Google Classroom.</li>
+<li>Прочитай «Теорію» і виконай «Завдання».</li>
+<li>Щоб здати роботу: «Поділитися» → посилання в Google Classroom.</li>
 </ul>
 <h3>Джерела</h3>
 <ul>
 <li><a href="https://geneza.ua/sites/default/files/ebooks/%D0%A0%D0%B8%D0%B2%D0%BA%D1%96%D0%BD%D0%B4_%D0%86%D0%BD%D1%84%D0%BE%D1%80%D0%BC_8_%D1%87_1.pdf" target="_blank" rel="noopener noreferrer">Ривкінд Й. Я. Інформатика, 8 клас</a></li>
 <li><a href="https://osvita.ua/school/textbook/9klas/84133/" target="_blank" rel="noopener noreferrer">Ривкінд Й. Я. Інформатика, 9 клас</a></li>
-<li><a href="https://lms.e-school.net.ua/" target="_blank" rel="noopener noreferrer">ВШО</a></li>
+<li><a href="https://lms.e-school.net.ua/" target="_blank" rel="noopener noreferrer">Всеукраїнська школа онлайн</a></li>
 </ul>
 <div class="mode"><h3>Мій прогрес</h3>
 <div class="row"><button class="btn" id="pSave"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Зберегти у файл</button><button class="btn" id="pLoad"><svg viewBox="0 0 24 24"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>Відкрити файл</button></div>
@@ -5628,7 +5627,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 function setTheme(t){document.documentElement.dataset.theme=t;$('#theme').innerHTML=t==='dark'?ICON.sun:ICON.moon;$('#theme').setAttribute('aria-label',t==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему');store.set('theme',t)}
 $('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 setTheme(store.get('theme',matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
-const MODS=['Модуль 1 · 8 клас','Модуль 2 · 9 клас'];
+const MODS=['8 клас','9 клас'];
 const MODT=['Основи Python і графічний інтерфейс','Списки, рядки, словники, функції та ігри'];
 const modOf=i=>i<16?0:1;
 const numIn=i=>i<16?i+1:i-15;
