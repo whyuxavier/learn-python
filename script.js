@@ -1750,15 +1750,15 @@ const PLAY='<svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 let tt;
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),1800)}
-/* ---------- Зима: темна тема за замовчуванням і піксельний сніг на головній ---------- */
-// Сезон триває з 20 листопада по 1 березня; повертає рік його початку (0 — не зима).
+/* ---------- Піксельний сніг на головній (темна тема, з 20 листопада по 1 березня) ---------- */
+// Повертає рік початку зими (0 — не сезон снігу).
 function winterSeason(d){const m=d.getMonth(),day=d.getDate(),y=d.getFullYear();
  if(m===10&&day>=20||m===11)return y;if(m<=1||m===2&&day===1)return y-1;return 0}
 const WINTER=winterSeason(new Date());
 const snowBox=document.createElement('div');snowBox.id='snow';snowBox.hidden=true;document.body.prepend(snowBox);
 let snowCtl=null,snowState=0; // 0 — не завантажено, 1 — завантажується, 2 — готово, 3 — недоступно
 function snowSync(){
- const on=snowState!==3&&document.body.classList.contains('home')&&document.documentElement.dataset.theme==='dark'&&!!window.WebGL2RenderingContext;
+ const on=!!WINTER&&snowState!==3&&document.body.classList.contains('home')&&document.documentElement.dataset.theme==='dark'&&!!window.WebGL2RenderingContext;
  snowBox.hidden=!on;
  if(!on)return;
  if(snowState===2){snowCtl.wake();return}
@@ -1770,9 +1770,10 @@ function snowSync(){
  s.onerror=()=>{snowState=3;snowBox.remove()};
  document.head.appendChild(s);
 }
-function setTheme(t,manual){document.documentElement.dataset.theme=t;$('#theme').innerHTML=t==='dark'?ICON.sun:ICON.moon;$('#theme').setAttribute('aria-label',t==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему');if(manual){store.set('theme',t);if(WINTER)store.set('themeW',WINTER)}snowSync()}
+function setTheme(t,manual){document.documentElement.dataset.theme=t;$('#theme').innerHTML=t==='dark'?ICON.sun:ICON.moon;$('#theme').setAttribute('aria-label',t==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему');if(manual)store.set('themeC',t);snowSync()}
 $('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',true);
-setTheme(WINTER&&store.get('themeW',0)!==WINTER?'dark':store.get('theme',matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+// Темна тема — за замовчуванням; світла лише якщо учень сам її обрав (themeC).
+setTheme(store.get('themeC','dark')==='light'?'light':'dark');
 const MODS=['8 клас','9 клас'];
 let fold=store.get('fold',[]);
 const MODT=['Основи Python і графічний інтерфейс','Списки, рядки, словники, функції та ігри'];
