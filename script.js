@@ -1750,9 +1750,29 @@ const PLAY='<svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 let tt;
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),1800)}
-function setTheme(t){document.documentElement.dataset.theme=t;$('#theme').innerHTML=t==='dark'?ICON.sun:ICON.moon;$('#theme').setAttribute('aria-label',t==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему');store.set('theme',t)}
-$('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
-setTheme(store.get('theme',matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+/* ---------- Зима: темна тема за замовчуванням і піксельний сніг на головній ---------- */
+// Сезон триває з 20 листопада по 1 березня; повертає рік його початку (0 — не зима).
+function winterSeason(d){const m=d.getMonth(),day=d.getDate(),y=d.getFullYear();
+ if(m===10&&day>=20||m===11)return y;if(m<=1||m===2&&day===1)return y-1;return 0}
+const WINTER=winterSeason(new Date());
+const snowBox=document.createElement('div');snowBox.id='snow';snowBox.hidden=true;document.body.prepend(snowBox);
+let snowCtl=null,snowState=0; // 0 — не завантажено, 1 — завантажується, 2 — готово, 3 — недоступно
+function snowSync(){
+ const on=snowState!==3&&document.body.classList.contains('home')&&document.documentElement.dataset.theme==='dark'&&!!window.WebGL2RenderingContext;
+ snowBox.hidden=!on;
+ if(!on)return;
+ if(snowState===2){snowCtl.wake();return}
+ if(snowState===1)return;
+ snowState=1;
+ const s=document.createElement('script');s.src='snow.js';s.async=true;
+ s.onload=()=>{try{snowCtl=window.PixelSnow&&PixelSnow.mount(snowBox,{color:'#e6ecff',density:.35,opacity:.75,dpr:document.documentElement.classList.contains('lite')?1:0})}catch(e){snowCtl=null}
+  snowState=snowCtl?2:3;if(!snowCtl)snowBox.remove();else snowSync()};
+ s.onerror=()=>{snowState=3;snowBox.remove()};
+ document.head.appendChild(s);
+}
+function setTheme(t,manual){document.documentElement.dataset.theme=t;$('#theme').innerHTML=t==='dark'?ICON.sun:ICON.moon;$('#theme').setAttribute('aria-label',t==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему');if(manual){store.set('theme',t);if(WINTER)store.set('themeW',WINTER)}snowSync()}
+$('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',true);
+setTheme(WINTER&&store.get('themeW',0)!==WINTER?'dark':store.get('theme',matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
 const MODS=['8 клас','9 клас'];
 let fold=store.get('fold',[]);
 const MODT=['Основи Python і графічний інтерфейс','Списки, рядки, словники, функції та ігри'];
@@ -3147,6 +3167,7 @@ function route(){
  if(shared){shared=null;document.body.classList.remove('sv');ta.readOnly=false;go(store.get('cur',0))}
  const c=isCourse();
  document.body.classList.toggle('home',!c);
+ snowSync();
  if(!c){renderHome();if(!homeSeen){homeSeen=true;setTimeout(()=>$('.art').classList.add('done'),7496)}}
  else{store.set('started',true);preloadPy()}
  window.scrollTo(0,0);
@@ -3254,7 +3275,7 @@ async function openShared(s){
  }catch(e){toast(e&&e.message==='old'?'Онови браузер, щоб відкрити роботу':'Посилання пошкоджене');history.replaceState(null,'',location.pathname+location.search);route();return}
  if(R.running)stopCode();
  shared={n:String(o.n||'Без імені').slice(0,60),l:o.l,d:o.d,f:o.f.slice(0,20).map(f=>[String(f[0]||'main.py').slice(0,40),String(f[1]||'')])};
- document.body.classList.remove('home');document.body.classList.add('sv');closeMenu();
+ document.body.classList.remove('home');document.body.classList.add('sv');snowSync();closeMenu();
  cur=shared.l;files=shared.f.map(f=>[f[0],f[1]]);file=0;ta.readOnly=true;
  renderShared();loadEditor();CON.clear();TK.reset();TT.reset();R.ui();window.scrollTo(0,0);
  preloadPy();

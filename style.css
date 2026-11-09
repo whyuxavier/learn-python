@@ -250,6 +250,8 @@ body.drag{user-select:none;cursor:col-resize}
 @media(max-width:520px){header h1 small{display:none}.card{padding:14px}.cmd{flex-direction:column;gap:2px}.cmd code{flex:none}.ph h3{display:none}#runTx,#stop span{display:none}main{padding:12px}}
 
 /* ---------- головна ---------- */
+#snow{position:fixed;inset:0;z-index:0;pointer-events:none}
+body.home .app{position:relative;z-index:1}
 #home{display:none}
 body.home #home{display:block;overflow-x:clip}
 body.home .app{height:auto;min-height:0;grid-template-columns:1fr;grid-template-rows:56px}

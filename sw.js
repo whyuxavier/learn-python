@@ -2,13 +2,14 @@
    Сторінка курсу: спершу мережа (щоб після оновлення на GitHub учні одразу
    отримали нову версію), без мережі — збережена копія.
    Pyodide і шрифти: з кешу (їхні адреси містять версію й не змінюються). */
-const VERSION = '2026-11-10';
+const VERSION = '2026-11-11';
 const SHELL = 'lp-shell-' + VERSION;   // сторінка, маніфест, іконки
 const ASSETS = 'lp-assets';            // Pyodide, шрифти (переживають оновлення SW)
 const SHELL_FILES = [
   './',
   'style.css',
   'script.js',
+  'snow.js',
   'py/_lpbridge.py', 'py/_lp.py', 'py/turtle.py',
   'py/tkinter/__init__.py', 'py/tkinter/constants.py', 'py/tkinter/messagebox.py',
   'py/tkinter/simpledialog.py', 'py/tkinter/font.py', 'py/tkinter/filedialog.py',
