@@ -347,6 +347,8 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 }
 @media(max-width:520px){.hm{padding:0 16px 24px}.ld{font-size:16px}.btn.lg{flex:1 1 100%;justify-content:center}}
 .sch{color:var(--ac)}.sch[hidden]{display:none}
+#instB{color:var(--ac)}
+.ins ol{padding-left:20px;margin:8px 0 0}.ins li{margin:4px 0}.ins .ki{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid var(--bd);border-radius:6px;background:var(--sf2);vertical-align:-6px}.ins .ki svg{width:15px;height:15px}
 .mode{margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)}
 .mode .row{display:flex;gap:8px;flex-wrap:wrap}.mode .row .btn{flex:1 1 150px;justify-content:center;margin-top:0}
 .sw{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;cursor:pointer}
@@ -365,6 +367,7 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
  <h1><button id="logo" title="На головну">Python з нуля</button></h1>
  <button class="ib" id="homeBtn" aria-label="На головну" title="На головну"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/></svg></button>
  <button class="ib sch" id="schB" hidden aria-label="Шкільний режим увімкнено" title="Шкільний режим: прогрес зникне після закриття браузера"><svg viewBox="0 0 24 24"><path d="M3 10l9-5 9 5-9 5z"/><path d="M7 12.5V17c0 1.2 2.2 2.5 5 2.5s5-1.3 5-2.5v-4.5"/></svg></button>
+ <button class="ib" id="instB" hidden aria-label="Встановити застосунок" title="Встановити як застосунок"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/></svg></button>
  <button class="ib" id="info" aria-label="Про курс" title="Про курс"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
  <button class="ib" id="theme" aria-label="Змінити тему"></button>
 </header>
@@ -490,6 +493,8 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 <div class="mode"><h3>Мій прогрес</h3>
 <div class="row"><button class="btn" id="pSave"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Зберегти у файл</button><button class="btn" id="pLoad"><svg viewBox="0 0 24 24"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>Відкрити файл</button></div>
 <input type="file" id="pFile" accept=".json,application/json" hidden></div>
+<div class="mode" id="instM"><h3>Застосунок</h3><p id="instTx" style="margin:0 0 10px;font-size:14px;color:var(--mu)">Встанови курс на комп'ютер чи телефон: окреме вікно, значок на робочому столі й робота без інтернету.</p>
+<div class="row"><button class="btn pr" id="instGo"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/></svg>Встановити застосунок</button></div></div>
 <a class="btn gh" href="https://github.com/whyuxavier/learn-python" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/></svg>Репозиторій на GitHub</a><p style="margin:12px 0 0;font-size:13px;color:var(--mu)">Створено з використанням ШІ.</p></div></div>
 <div class="modal" id="shm" hidden role="dialog" aria-modal="true" aria-labelledby="sht"><div class="card mc">
 <button class="ib mx" id="shclose" aria-label="Закрити"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -503,6 +508,12 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 <button class="btn pr" id="shcp">Копіювати посилання</button>
 <p class="shs">Встав посилання у завдання в Google Classroom. Якщо зміниш код — створи нове посилання.</p>
 </div></div></div>
+<div class="modal" id="insm" hidden role="dialog" aria-modal="true" aria-labelledby="inst"><div class="card mc ins">
+<button class="ib mx" id="insclose" aria-label="Закрити"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+<h2 id="inst">Встановити застосунок</h2>
+<div id="insBody"></div>
+<p style="margin:12px 0 0;font-size:13px;color:var(--mu)">Після встановлення курс відкривається з окремого значка й працює навіть без інтернету. Прогрес зберігається.</p>
+</div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script type="text/x-python" data-path="_lpbridge.py">
 """Міст між Python (Pyodide) і сторінкою курсу. Службовий модуль."""
@@ -7258,6 +7269,49 @@ files=getFiles(cur);renderNav();renderLesson();loadEditor();route();
    }).catch(()=>{});
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}
  });
+})();
+
+/* ---------- Встановлення як застосунок ---------- */
+(()=>{
+ const ib=$('#instB'),go=$('#instGo'),sec=$('#instM'),insm=$('#insm');
+ const ua=navigator.userAgent,
+  ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+  mac=!ios&&/Macintosh/.test(ua)&&/Safari/.test(ua)&&!/Chrome|Chromium|Edg|OPR|Firefox/.test(ua),
+  ff=/Firefox|FxiOS/.test(ua),andr=/Android/.test(ua);
+ const standalone=()=>matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: window-controls-overlay)').matches||navigator.standalone===true;
+ const ok=/^https?:$/.test(location.protocol);
+ let dp=null;
+ const ic=d=>'<span class="ki"><svg viewBox="0 0 24 24">'+d+'</svg></span>';
+ const SH=ic('<path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1"/>'),PL=ic('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>'),DOT=ic('<path d="M12 6h.01M12 12h.01M12 18h.01"/>');
+ function help(){
+  let h;
+  if(ios)h='<p>У Safari на iPhone чи iPad:</p><ol><li>Натисни '+SH+' <b>Поділитися</b> внизу або вгорі екрана.</li><li>Обери '+PL+' <b>На екран «Додому»</b> (прогорни список донизу).</li><li>Натисни <b>Додати</b>.</li></ol>';
+  else if(mac)h='<p>У Safari на Mac:</p><ol><li>Відкрий меню <b>Файл</b> або натисни '+SH+' <b>Поділитися</b>.</li><li>Обери <b>Додати в Dock</b>.</li></ol>';
+  else if(ff&&!andr)h='<p>Firefox на комп\'ютері поки не вміє встановлювати сайти як застосунки. Відкрий курс у <b>Chrome</b> або <b>Edge</b> і натисни кнопку встановлення ще раз.</p>';
+  else if(andr)h='<p>На Android:</p><ol><li>Відкрий меню браузера '+DOT+'.</li><li>Обери <b>Додати на головний екран</b> або <b>Встановити застосунок</b>.</li></ol>';
+  else h='<p>У Chrome або Edge:</p><ol><li>Натисни значок встановлення праворуч в адресному рядку або відкрий меню '+DOT+'.</li><li>Обери <b>Встановити «Python з нуля»</b> (в Edge: <b>Застосунки → Установити цей сайт як застосунок</b>).</li></ol>';
+  $('#insBody').innerHTML=h;
+ }
+ function openHelp(){help();if(!modal.hidden)modal.hidden=true;insm.hidden=false;$('#insclose').focus()}
+ function closeHelp(){insm.hidden=true;(ib.hidden?$('#info'):ib).focus()}
+ function sync(){
+  const inst=standalone();
+  sec.hidden=inst||!ok;
+  ib.hidden=inst||!ok||!(dp||ios);
+ }
+ async function install(){
+  if(!dp){openHelp();return}
+  const p=dp;dp=null;p.prompt();
+  try{const r=await p.userChoice;if(r&&r.outcome==='accepted'){modal.hidden=true}}catch(e){}
+  sync();
+ }
+ ib.onclick=install;go.onclick=install;
+ $('#insclose').onclick=closeHelp;insm.onclick=e=>{if(e.target===insm)closeHelp()};
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!insm.hidden)closeHelp()});
+ addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;sync()});
+ addEventListener('appinstalled',()=>{dp=null;modal.hidden=true;insm.hidden=true;sync();toast('Застосунок встановлено')});
+ matchMedia('(display-mode: standalone)').addEventListener?.('change',sync);
+ sync();
 })();
 </script>
 </body>
