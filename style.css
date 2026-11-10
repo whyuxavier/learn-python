@@ -355,3 +355,6 @@ body:not(.home) header,body:not(.home) aside,body:not(.home) .card{backdrop-filt
 .lite header,.lite aside,.lite .card{background:var(--sfs)}
 .lite body{background:var(--bg)}
 .lite .qc:hover{transform:none}
+
+/* [i]: кнопка GitHub такої ж ширини, як «Встановити застосунок» */
+.mc .btn.gh{display:flex;width:100%;justify-content:center;box-sizing:border-box}
