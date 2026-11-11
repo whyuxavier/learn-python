@@ -2,7 +2,7 @@
    Сторінка курсу: спершу мережа (щоб після оновлення на GitHub учні одразу
    отримали нову версію), без мережі — збережена копія.
    Pyodide і шрифти: з кешу (їхні адреси містять версію й не змінюються). */
-const VERSION = '2026-11-11-lessons';
+const VERSION = '2026-11-11-resize';
 const SHELL = 'lp-shell-' + VERSION;   // сторінка, маніфест, іконки
 const ASSETS = 'lp-assets';            // Pyodide, шрифти (переживають оновлення SW)
 const SHELL_FILES = [

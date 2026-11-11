@@ -358,3 +358,13 @@ body:not(.home) header,body:not(.home) aside,body:not(.home) .card{backdrop-filt
 
 /* [i]: кнопка GitHub такої ж ширини, як «Встановити застосунок» */
 .mc .btn.gh{display:flex;width:100%;justify-content:center;box-sizing:border-box}
+
+/* повзунок між редактором і результатом */
+.ws{gap:0}
+.rzh{flex:none;height:12px;position:relative;cursor:row-resize;touch-action:none;border-radius:6px}
+.rzh::after{content:"";position:absolute;top:4px;left:50%;width:48px;height:4px;margin-left:-24px;border-radius:4px;background:var(--bd)}
+.rzh:hover::after,.rzh:focus-visible::after,.dragy .rzh::after{background:var(--ac)}.rzh:focus-visible{outline:0}
+body.dragy{user-select:none;cursor:row-resize}.dragy iframe{pointer-events:none}
+.ws.sized #p-ed{flex:0 1 var(--er)}.ws.sized #p-out{flex:1 1 0;min-height:120px}
+.ws:has(.pane.shut) .rzh{visibility:hidden}.ws:has(.pane.shut) #p-ed{flex:1}
+@media(max-width:1100px){.rzh{height:20px}.rzh::after{top:8px}.ws.sized #p-ed,.ws.sized #p-out{flex:none}.ws.sizedm .ed{height:var(--eh)}}

@@ -3215,6 +3215,22 @@ rz.onpointerdown=e=>{
 };
 rz.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setLc($('#lw').getBoundingClientRect().width+(e.key==='ArrowRight'?24:-24));store.set('ui',ui)}};
 rz.ondblclick=()=>{mainEl.style.removeProperty('--lc');delete ui.lc;store.set('ui',ui)};
+/* ---------- повзунок висоти: редактор ↔ результат ---------- */
+const rzh=$('#rzh'),wsEl=$('.ws'),mob=()=>matchMedia('(max-width:1100px)').matches;
+function setEr(r){r=Math.max(.15,Math.min(.85,r));wsEl.style.setProperty('--er',(r*100).toFixed(1)+'%');wsEl.classList.add('sized');ui.er=r;requestAnimationFrame(fitAll)}
+function setEh(h){h=Math.round(Math.max(160,Math.min(h,innerHeight*1.5)));wsEl.style.setProperty('--eh',h+'px');wsEl.classList.add('sizedm');ui.eh=h;requestAnimationFrame(fitAll)}
+const edH=()=>$('#p-ed .ed').getBoundingClientRect().height;
+rzh.onpointerdown=e=>{
+ e.preventDefault();rzh.setPointerCapture(e.pointerId);document.body.classList.add('dragy');
+ const y0=e.clientY,h0=edH(),r=wsEl.getBoundingClientRect(),p0=$('#p-ed').getBoundingClientRect().height;
+ const mv=ev=>{if(mob())setEh(h0+ev.clientY-y0);else setEr((p0+ev.clientY-y0)/(r.height-12))};
+ const up=()=>{rzh.removeEventListener('pointermove',mv);rzh.removeEventListener('pointerup',up);rzh.removeEventListener('pointercancel',up);document.body.classList.remove('dragy');store.set('ui',ui)};
+ rzh.addEventListener('pointermove',mv);rzh.addEventListener('pointerup',up);rzh.addEventListener('pointercancel',up);
+};
+rzh.onkeydown=e=>{if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;e.preventDefault();const d=e.key==='ArrowDown'?1:-1;
+ if(mob())setEh(edH()+d*40);else setEr(($('#p-ed').getBoundingClientRect().height+d*40)/(wsEl.getBoundingClientRect().height-12));store.set('ui',ui)};
+rzh.ondblclick=()=>{wsEl.classList.remove('sized','sizedm');wsEl.style.removeProperty('--er');wsEl.style.removeProperty('--eh');delete ui.er;delete ui.eh;store.set('ui',ui);requestAnimationFrame(fitAll)};
+if(ui.er)setEr(ui.er);if(ui.eh)setEh(ui.eh);
 /* ---------- прогрес: файл і шкільний режим ---------- */
 $('#schB').hidden=!SCH;$('#schB').onclick=()=>openInfo();
 $('#schT').checked=SCH;
