@@ -3095,7 +3095,7 @@ function go(i){
  cur=i;store.set('cur',i);file=0;files=getFiles(i);
  renderNav();renderLesson();loadEditor();
  CON.clear();TK.reset();TT.reset();R.ui();
- closeMenu();window.scrollTo(0,0);
+ closeMenu();window.scrollTo(0,0);syncHash();
 }
 $('#nav').onclick=e=>{const m=e.target.closest('.mod[data-m]');if(m){const k=+m.dataset.m;fold=fold.includes(k)?fold.filter(x=>x!==k):fold.concat(k);store.set('fold',fold);renderNav();return}const b=e.target.closest('.li');if(!b)return;if(b.dataset.home){closeMenu();showHome();if(b.dataset.home==='quests')setTimeout(()=>$('#quests').scrollIntoView(),50)}else go(+b.dataset.i)};
 
@@ -3161,11 +3161,18 @@ function renderHome(){
    ls.map(([l,i])=>'<button class="ml'+(done.includes(i)?' d':'')+'" data-i="'+i+'"><b>'+(done.includes(i)?CHECK:numIn(i))+'</b><span>'+esc(l.s||l.t)+'</span></button>').join('')+'</div>';
  }).join('');
 }
-const isCourse=()=>location.hash==='#course';
+/* окреме посилання на кожен урок: …/learn-python/#8-urok-1, #9-urok-2 */
+const LH=i=>'#'+(modOf(i)?9:8)+'-urok-'+numIn(i);
+const hashLesson=()=>{const m=/^#(8|9)-urok-(\d+)$/.exec(location.hash);if(!m)return -1;const n=+m[2],i=(m[1]==='9'?16:0)+n-1;return n>=1&&n<=16&&i<N?i:-2};
+const isCourse=()=>location.hash==='#course'||hashLesson()!==-1;
+let routed=false;
+function syncHash(){if(routed&&!shared&&isCourse()&&location.hash!==LH(cur))history.replaceState(null,'',location.pathname+location.search+LH(cur))}
 let homeSeen=false;
 function route(){
  if(location.hash.startsWith('#s=')){openShared(location.hash.slice(3));return}
  if(shared){shared=null;document.body.classList.remove('sv');ta.readOnly=false;go(store.get('cur',0))}
+ const h=hashLesson();if(h>=0&&h!==cur)go(h);
+ routed=true;syncHash();
  const c=isCourse();
  document.body.classList.toggle('home',!c);
  snowSync();
@@ -3173,7 +3180,7 @@ function route(){
  else{store.set('started',true);preloadPy()}
  window.scrollTo(0,0);
 }
-function openCourse(i){if(i!==undefined&&i!==cur)go(i);if(isCourse())route();else location.hash='course'}
+function openCourse(i){if(i!==undefined&&i!==cur)go(i);if(isCourse())route();else location.hash=LH(cur).slice(1)}
 function showHome(){if(isCourse()||shared)history.pushState(null,'',location.pathname+location.search);route()}
 $('#start').onclick=()=>openCourse();
 $('#mods').onclick=e=>{const b=e.target.closest('.ml');if(b)openCourse(+b.dataset.i)};
