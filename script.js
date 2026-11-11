@@ -3140,8 +3140,8 @@ const VIDEO=[
 const PYLOGO='<svg viewBox="361 102 24 24" style="stroke:none"><path d="M373 103c-4 0-5 1.4-5 3.2v2.6h5.3v1.3h-7.5c-2.2 0-3.6 1.8-3.6 4.4s1.4 4.4 3.6 4.4h2.2v-3.1c0-2.2 1.3-3.5 3.5-3.5h4.8c1.8 0 3.1-1.3 3.1-3.1v-3c0-1.8-1.8-3.2-6.4-3.2z" fill="#6f8ad6"/><path d="M373 125c4 0 5-1.4 5-3.2v-2.6h-5.3v-1.3h7.5c2.2 0 3.6-1.8 3.6-4.4s-1.4-4.4-3.6-4.4H378v3.1c0 2.2-1.3 3.5-3.5 3.5h-4.8c-1.8 0-3.1 1.3-3.1 3.1v3c0 1.8 1.8 3.2 6.4 3.2z" fill="#f0c75e"/><circle cx="370.6" cy="105.6" r=".9" fill="#fff"/><circle cx="375.4" cy="122.4" r=".9" fill="#fff"/></svg>';
 const GO='<svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>';
 const QUESTS=[
- {u:'https://whyuxavier.github.io/python-quiz/',t:'Python-змійка',d:'8 клас · квест з рівнями',m:0,i:PYLOGO},
- {u:'https://whyuxavier.github.io/python-quest-9/',t:'Підсумковий квест: Python, 9 клас',d:'Випадкові числа, списки, словники, Turtle, Tkinter, шифри',m:1,i:PYLOGO},
+ {u:'https://whyuxavier.github.io/python-quiz/',t:'Підсумковий квест: Python-змійка',d:'8 клас, квест з рівнями, базові конструкції, Tkinter',m:0,i:PYLOGO},
+ {u:'https://whyuxavier.github.io/python-quest-9/',t:'Підсумковий квест: Основи Python',d:'9 клас, random, списки, словники, Turtle, Tkinter',m:1,i:PYLOGO},
  {u:'https://whyuxavier.github.io/bug-storm/',t:'Баг-шторм',d:'Гра й тест: виправ помилки в коді Python',i:'<svg viewBox="0 0 24 24" style="stroke:none"><path d="M9 6.5a3 3 0 0 1 6 0z" fill="#f0c75e"/><rect x="6.5" y="7.5" width="11" height="13" rx="5.5" fill="#6f8ad6"/><path d="M12 8.5v11" stroke="#fff" stroke-width="1.4"/><path d="M6.5 11H3.5M6.5 15H3M7.5 19l-2.5 2M17.5 11h3M17.5 15h3.5M16.5 19l2.5 2M10 4.5 8.5 2.5M14 4.5l1.5-2" stroke="#6f8ad6" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.5" cy="12" r="1" fill="#fff"/><circle cx="14.5" cy="16" r="1" fill="#fff"/></svg>'}];
 const qcard=q=>'<a class="card qc" href="'+q.u+'" target="_blank" rel="noopener noreferrer"><span class="qi">'+q.i+'</span><span><b>'+esc(q.t)+'</b><span>'+esc(q.d)+'</span></span><span class="go">'+GO+'</span></a>';
 $('#qlist').innerHTML=QUESTS.map(qcard).join('');
