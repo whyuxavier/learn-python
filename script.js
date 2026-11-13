@@ -2163,6 +2163,16 @@ function copyText(t){
  });
 }
 $('#copy').onclick=()=>copyText(ta.value).then(()=>toast('Код скопійовано'),()=>toast('Не вдалося скопіювати'));
+/* завантаження поточного файлу як .py: 8-urok-1.py (або 8-urok-1-game.py, якщо файлів кілька) */
+$('#dl').onclick=()=>{
+ const f=files[file]?files[file][0]:'main.py';
+ const base=LH(cur).slice(1);
+ let name=base+'.py';
+ if(files.length>1)name=base+'-'+f.replace(/\.py$/i,'')+'.py';
+ const u=URL.createObjectURL(new Blob([ta.value],{type:'text/x-python;charset=utf-8'})),a=document.createElement('a');
+ a.href=u;a.download=name;document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Файл збережено');
+};
 $('#reset').onclick=()=>{if(!confirm('Повернути початковий код уроку? Твої зміни буде втрачено.'))return;store.del(codeKey(cur));files=starterFiles(cur);file=0;loadEditor();toast('Код скинуто')};
 /* ---------- консоль ---------- */
 const con=$('#con');
