@@ -3067,7 +3067,7 @@ function renderLesson(){
  '<div class="card"><h2 class="t">'+esc(l.t)+'</h2></div>'+
  '<div class="card th"><h2>Теорія</h2>'+l.th+'</div>'+
  '<div class="card"><h2>Команди та функції</h2>'+l.cm.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>'+
- '<div class="card"><div class="exh"><h2>Приклад коду</h2>'+(l.pgz||l.noRun?'':'<button class="btn" id="runEx" title="Запустити приклад">'+PLAY+'Запустити</button>')+'</div><pre><code>'+hlPy(l.ex)+'</code></pre></div>'+
+ '<div class="card"><div class="exh"><h2>Приклад коду</h2><div class="acts">'+(l.pgz||l.noRun?'':'<button class="btn" id="runEx" title="Запустити приклад">'+PLAY+'Запустити</button>')+'<button class="btn" id="cpex">Копіювати</button></div></div><pre><code>'+hlPy(l.ex)+'</code></pre></div>'+
  (l.how?'<div class="card"><h2>Як це працює</h2>'+l.how.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>':'')+
  (l.err?'<div class="card warn"><h2>Часті помилки</h2><ul>'+l.err.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>':'')+
  '<button class="btn pr tonext" id="toTask">До завдання →</button></div>'+
@@ -3088,6 +3088,7 @@ function renderLesson(){
  $('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>cur===N-1?showHome():go(cur+1);
  $('#mark').onclick=()=>{done=done.includes(cur)?done.filter(x=>x!==cur):done.concat(cur);store.set('done',done);renderNav();renderLesson();toast(done.includes(cur)?'Урок завершено':'Позначку знято')};
  const re=$('#runEx');if(re)re.onclick=()=>runCode(l.ex);
+ $('#cpex').onclick=()=>copyText(l.ex).then(()=>toast('Приклад скопійовано'),()=>toast('Не вдалося скопіювати'));
  $('#lesson .chk').onchange=e=>{const c=+e.target.dataset.c;let a=store.get('chk:'+cur,[]);a=e.target.checked?a.concat(c):a.filter(x=>x!==c);store.set('chk:'+cur,a);evalChecks(true)};
  chkAll=false;evalChecks(false);
  pgzUI(l);

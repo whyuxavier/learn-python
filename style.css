@@ -104,6 +104,7 @@ body.sv .lt{visibility:hidden}
 .ref{font-size:12px;color:var(--mu);border:1px solid var(--bd);border-radius:999px;padding:2px 10px;white-space:nowrap;margin-top:8px;display:inline-block}
 .exh{display:flex;align-items:center;justify-content:space-between;gap:8px}.exh h2{margin:0}
 .exh .btn{min-height:32px;padding:4px 10px;font-size:13.5px}
+.exh .acts{display:flex;gap:8px;flex:none}
 .chk{list-style:none;padding:0;margin:8px 0 4px}
 .chk li{margin:0}
 .chk label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer}
