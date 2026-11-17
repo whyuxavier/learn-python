@@ -167,11 +167,16 @@
 <p id="shl" class="shs"></p>
 <label class="fl" for="shn">Ім'я та прізвище</label>
 <input class="fi" id="shn" maxlength="60" autocomplete="name" placeholder="Наприклад: Леонід Каденюк">
-<button class="btn pr" id="shgo">Створити посилання</button>
+<label class="fl" for="shk">Клас</label>
+<input class="fi" id="shk" maxlength="10" autocomplete="off" list="shkl" placeholder="8-А">
+<datalist id="shkl"><option value="8-А"><option value="8-Б"><option value="8-В"><option value="8-Г"><option value="8-Д"></datalist>
+<button class="btn pr" id="shgo">Здати роботу</button>
 <div id="shres" hidden>
+<p class="shsc" id="shsc"></p>
+<p class="shst" id="shst" hidden></p>
 <input class="fi" id="shu" readonly aria-label="Посилання на роботу">
 <button class="btn pr" id="shcp">Копіювати посилання</button>
-<p class="shs">Встав посилання у завдання в Google Classroom. Якщо зміниш код — створи нове посилання.</p>
+<p class="shs">Посилання для Google Classroom: встав його в завдання. Якщо зміниш код — здай роботу ще раз.</p>
 </div></div></div>
 <div class="modal" id="insm" hidden role="dialog" aria-modal="true" aria-labelledby="inst"><div class="card mc ins">
 <button class="ib mx" id="insclose" aria-label="Закрити"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>

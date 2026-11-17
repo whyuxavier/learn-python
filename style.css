@@ -426,3 +426,9 @@ details.more ul{margin:2px 0 6px;padding-left:20px}details.more li{margin:5px 0}
 #con{font-size:calc(13.5px * var(--fs,1))}
 :focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 @media(max-width:520px){.gsb{padding:6px 6px 6px 10px;font-size:13.5px}.gpop{right:-48px}}
+/* ---------- здача роботи й перегляд ---------- */
+.shsc{margin:12px 0 4px;font-weight:600}
+.shst{margin:0 0 8px;font-size:14px;color:var(--ok)}
+.kl{font-size:14px;font-weight:600;color:var(--ac);border:1px solid var(--ac);border-radius:8px;padding:1px 7px;vertical-align:middle;margin-left:4px}
+.svs{margin:4px 0 2px;font-size:15px}.svs b{font-size:20px;color:var(--ok)}
+body.sv .lh{display:none}

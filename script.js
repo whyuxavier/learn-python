@@ -1552,8 +1552,34 @@ async function unpack(s){
  return JSON.parse(new TextDecoder().decode(u));
 }
 const shm=$('#shm');
+/* ---------- оцінка роботи за вимогами «Перевір себе»: 1–12 ----------
+   Обов'язкові вимоги разом дають 12 балів (або 10, якщо є бонуси — тоді бонуси дають ще 2). */
+function gradeOf(i,fl){
+ const l=LESSONS[i],rules=AUTO[i]||[],raw=fl.map(f=>f[1]).join('\n'),c=noComments(raw),man=shared?[]:store.get('chk:'+i,[]);
+ const B=l.ok.map(isBonus),nm=B.filter(b=>!b).length,nb=B.length-nm,total=nb?10:12,base=Math.floor(total/nm),rem=total%nm;
+ let sc=0,k=0;const miss=[];
+ l.ok.forEach((x,j)=>{const w=B[j]?2/nb:base+(++k>nm-rem?1:0);
+  if((rules[j]&&autoTest(rules[j],c,fl,raw))||man.includes(j))sc+=w;else if(!B[j])miss.push(j+1)});
+ return {s:Math.max(1,Math.round(sc)),miss};
+}
+/* ---------- надсилання робіт у Google Таблицю вчителя ----------
+   Адреса вебзастосунку Apps Script — у COURSE.sheet (або ?sheet=адреса для цього пристрою).
+   Без інтернету робота чекає в черзі й надсилається, щойно з'явиться зв'язок. */
+(()=>{try{const u=new URL(location.href),q=u.searchParams.get('sheet');if(q!==null){
+ if(/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(q))localStorage.setItem('lp:sheet',q);else localStorage.removeItem('lp:sheet');
+ u.searchParams.delete('sheet');history.replaceState(null,'',u.pathname+u.search+u.hash)}}catch(e){}})();
+const SHEET=()=>{try{return localStorage.getItem('lp:sheet')||COURSE.sheet||''}catch(e){return COURSE.sheet||''}};
+const QK='lp:queue';
+function queue(){try{return JSON.parse(localStorage.getItem(QK)||'[]')}catch(e){return[]}}
+function setQueue(a){try{localStorage.setItem(QK,JSON.stringify(a.slice(-30)))}catch(e){}}
+async function sendRow(row){const u=SHEET();if(!u)return false;
+ try{await fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(row)});return true}catch(e){return false}}
+let flushing=false;
+async function flushQueue(){if(flushing||!navigator.onLine)return;const q=queue();if(!q.length)return;flushing=true;setQueue([]);const left=[];for(const r of q)if(!await sendRow(r))left.push(r);if(left.length)setQueue(queue().concat(left));flushing=false}
+addEventListener('online',flushQueue);setTimeout(flushQueue,4000);
 function openShare(){
  $('#shl').textContent=L().t;
+ $('#shk').value=store.get('klas','');$('#shst').hidden=true;
  $('#shn').value=store.get('name','');$('#shres').hidden=true;shm.hidden=false;$('#shn').focus();
 }
 function closeShare(){shm.hidden=true;$('#share').focus()}
@@ -1566,12 +1592,28 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!mm.hidden){closeMo
 $('#share').onclick=openShare;$('#shclose').onclick=closeShare;shm.onclick=e=>{if(e.target===shm)closeShare()};
 $('#shn').oninput=()=>{$('#shres').hidden=true};
 $('#shn').onkeydown=e=>{if(e.key==='Enter')$('#shgo').click()};
+$('#shk').oninput=()=>{$('#shres').hidden=true};
+$('#shk').onkeydown=e=>{if(e.key==='Enter')$('#shgo').click()};
 $('#shgo').onclick=async()=>{
  const n=$('#shn').value.trim().replace(/\s+/g,' ');
- if(n.length<3){toast('Введи прізвище та ім\'я');$('#shn').focus();return}
- store.set('name',n);
- const o={n,l:cur,d:Date.now(),f:files.map(f=>[f[0],f[1]]),v:COURSE.ver||1};
- $('#shu').value=location.origin+location.pathname+'#s='+await pack(o);
+ const kl=$('#shk').value.trim().toUpperCase().replace(/\s+/g,'').replace(/^(\d+)([А-ЯІЇЄҐ])$/,'$1-$2');
+ if(n.length<3){toast('Введи ім\'я та прізвище');$('#shn').focus();return}
+ if(!kl){toast('Вкажи клас');$('#shk').focus();return}
+ store.set('name',n);store.set('klas',kl);$('#shk').value=kl;
+ const g=gradeOf(cur,files);
+ const o={n,k:kl,l:cur,d:Date.now(),f:files.map(f=>[f[0],f[1]]),v:COURSE.ver||1,s:g.s,m:g.miss};
+ const link=location.origin+location.pathname+'#s='+await pack(o);
+ $('#shu').value=link;
+ $('#shsc').textContent='Бал за вимогами: '+g.s+' з 12'+(g.miss.length?'. Не виконано: '+g.miss.join(', '):'. Усі вимоги виконано!');
+ const st=$('#shst');st.hidden=!SHEET();
+ if(SHEET()){
+  const row={date:new Date().toISOString(),name:n,klas:kl,course:COURSE.g,lesson:numIn(cur),title:L().t,score:g.s,miss:g.miss.join(', '),link,
+   code:files.map(f=>(files.length>1?'# ===== '+f[0]+' =====\n':'')+f[1]).join('\n\n').slice(0,45000)};
+  st.textContent='Надсилаю вчителю…';
+  const ok=navigator.onLine&&await sendRow(row);
+  if(!ok)setQueue(queue().concat(row));
+  st.textContent=ok?'Роботу надіслано вчителю ✓':'Немає інтернету: робота надішлеться сама, щойно з\'явиться зв\'язок';
+ }
  $('#shres').hidden=false;$('#shu').select();
 };
 $('#shcp').onclick=()=>copyText($('#shu').value).then(()=>toast('Посилання скопійовано'),()=>{$('#shu').select();toast('Скопіюй вручну: Ctrl+C')});
@@ -1584,7 +1626,8 @@ async function openShared(s){
   if(!(Number.isInteger(o.l)&&o.l>=0&&o.l<N&&Array.isArray(o.f)&&o.f.length))throw 0;
  }catch(e){toast(e&&e.message==='old'?'Онови браузер, щоб відкрити роботу':'Посилання пошкоджене');history.replaceState(null,'',location.pathname+location.search);route();return}
  if(R.running)stopCode();
- shared={n:String(o.n||'Без імені').slice(0,60),l:o.l,d:o.d,v:o.v||1,f:o.f.slice(0,20).map(f=>[String(f[0]||'main.py').slice(0,40),String(f[1]||'')])};
+ shm.hidden=true;
+ shared={n:String(o.n||'Без імені').slice(0,60),k:String(o.k||'').slice(0,10),s:Number.isInteger(o.s)&&o.s>=1&&o.s<=12?o.s:0,m:Array.isArray(o.m)?o.m.filter(Number.isInteger).slice(0,12):[],l:o.l,d:o.d,v:o.v||1,f:o.f.slice(0,20).map(f=>[String(f[0]||'main.py').slice(0,40),String(f[1]||'')])};
  document.body.classList.remove('home');document.body.classList.add('sv');snowSync();closeMenu();
  cur=shared.l;files=shared.f.map(f=>[f[0],f[1]]);file=0;ta.readOnly=true;
  renderShared();loadEditor();CON.clear();TK.reset();TT.reset();R.ui();window.scrollTo(0,0);
@@ -1592,7 +1635,7 @@ async function openShared(s){
 }
 function renderShared(){
  const l=LESSONS[shared.l],dt=shared.d?new Date(shared.d).toLocaleString('uk-UA',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
- $('#lesson').innerHTML='<div class="card svh"><span class="meta">Робота учня</span><div class="who">'+esc(shared.n)+'</div><div class="meta">'+(shared.v!==(COURSE.ver||1)?'Попередня версія курсу':esc(l.t))+(dt?' · '+dt:'')+'</div>'+
+ $('#lesson').innerHTML='<div class="card svh"><span class="meta">Робота учня</span><div class="who">'+esc(shared.n)+(shared.k?' <span class="kl">'+esc(shared.k)+'</span>':'')+'</div>'+(shared.s?'<div class="svs"><b>'+shared.s+'</b> з 12'+(shared.m&&shared.m.length?' · не виконано: '+shared.m.join(', '):' · усі вимоги виконано')+'</div>':'')+'<div class="meta">'+(shared.v!==(COURSE.ver||1)?'Попередня версія курсу':esc(l.t))+(dt?' · '+dt:'')+'</div>'+
  '<div class="acts"><button class="btn pr" id="svEd">Відкрити в редакторі</button><button class="btn" id="svX">Закрити перегляд</button></div></div>'+
  (shared.v!==(COURSE.ver||1)?'<div class="card task"><p>Робота з попередньої версії курсу: завдання уроку відтоді змінилося.</p></div>':'<div class="card task"><p class="tq">'+esc(l.task)+'</p>'+
  (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
