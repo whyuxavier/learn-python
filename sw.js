@@ -2,12 +2,15 @@
    Сторінка курсу: спершу мережа (щоб після оновлення на GitHub учні одразу
    отримали нову версію), без мережі — збережена копія.
    Pyodide і шрифти: з кешу (їхні адреси містять версію й не змінюються). */
-const VERSION = '2026-11-16-links';
-const SHELL = 'lp-shell-' + VERSION;   // сторінка, маніфест, іконки
+const VERSION = '2026-11-17-split';
+// курси 8 і 9 класу на одному домені — у кожного свій кеш сторінки
+const SCOPE_ID = new URL(self.registration.scope).pathname.replace(/\W+/g, '');
+const SHELL = 'lp-shell-' + SCOPE_ID + '-' + VERSION;   // сторінка, маніфест, іконки
 const ASSETS = 'lp-assets';            // Pyodide, шрифти (переживають оновлення SW)
 const SHELL_FILES = [
   './',
   'style.css',
+  'lessons.js',
   'script.js',
   'snow.js',
   'py/_lpbridge.py', 'py/_lp.py', 'py/turtle.py',
@@ -37,7 +40,8 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     for (const k of await caches.keys())
-      if (k.startsWith('lp-shell-') && k !== SHELL) await caches.delete(k);
+      if (k !== SHELL && (k.startsWith('lp-shell-' + SCOPE_ID + '-') ||
+          /^lp-shell-\d/.test(k))) await caches.delete(k);   // ще й старі кеші спільного курсу
     await self.clients.claim();
   })());
 });
