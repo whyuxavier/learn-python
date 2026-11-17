@@ -1,7 +1,8 @@
 /* Python з нуля · 8 клас — уроки й автоперевірка  */
 /* Налаштування курсу */
 const COURSE={g:8,key:'lpy:',url:'https://whyuxavier.github.io/learn-python/',other:{g:9,url:'../learn-python-9/'},
- title:'Основи Python і графічний інтерфейс',zero:true,ver:2};
+ title:'Основи Python і графічний інтерфейс',zero:true,ver:2,
+ sheet:'https://script.google.com/macros/s/AKfycbzGpSWGe5ju18HXUu8xExUrhCz15mY51WmkelIoa0lO23vZy59V2nKOjIUODyT3N8ns/exec'};
 
 /* Схеми інтерфейсу курсу для уроку 0 (кольори — з теми сайту) */
 const GD={
