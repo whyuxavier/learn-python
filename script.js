@@ -34,6 +34,8 @@ const store={
 const N=LESSONS.length;
 /* у курсі 8 класу зберігаємо прогрес 9 класу зі спільного курсу, доки його не забере курс 9 класу */
 if(COURSE.g===8)try{const L=localStorage;if(L.getItem('lpy:done9')===null){const d=JSON.parse(L.getItem('lpy:done')||'[]');L.setItem('lpy:done9',JSON.stringify(Array.isArray(d)?d.filter(x=>x>=16):[]));L.setItem('lpy:cur9',L.getItem('lpy:cur')||'0')}}catch(e){}
+/* нова версія уроків: старий код, відмітки й прогрес стосувалися інших завдань — прибираємо їх */
+if(store.get('lv',1)!==(COURSE.ver||1)){try{keysOf(ST).forEach(k=>{if(/^(code|chk):|^(done|cur|ltab)$/.test(k.slice(K.length)))ST.removeItem(k)})}catch(e){}store.set('lv',COURSE.ver||1)}
 let cur=store.get('cur',0),done=store.get('done',[]).filter(i=>i>=0&&i<N),file=0;
 if(!(cur>=0&&cur<N))cur=0;
 const $=s=>document.querySelector(s);
@@ -1579,7 +1581,7 @@ async function openShared(s){
 }
 function renderShared(){
  const l=LESSONS[shared.l],dt=shared.d?new Date(shared.d).toLocaleString('uk-UA',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
- $('#lesson').innerHTML='<div class="card svh"><span class="meta">Робота учня</span><div class="who">'+esc(shared.n)+'</div><div class="meta">'+esc(l.t)+(dt?' · '+dt:'')+'</div>'+
+ $('#lesson').innerHTML='<div class="card svh"><span class="meta">Робота учня</span><div class="who">'+esc(shared.n)+'</div><div class="meta">'+(shared.v!==(COURSE.ver||1)?'Попередня версія курсу':esc(l.t))+(dt?' · '+dt:'')+'</div>'+
  '<div class="acts"><button class="btn pr" id="svEd">Відкрити в редакторі</button><button class="btn" id="svX">Закрити перегляд</button></div></div>'+
  (shared.v!==(COURSE.ver||1)?'<div class="card task"><p>Робота з попередньої версії курсу: завдання уроку відтоді змінилося.</p></div>':'<div class="card task"><h2>Практичне завдання</h2><p><b>'+esc(l.task)+'</b></p>'+
  (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
