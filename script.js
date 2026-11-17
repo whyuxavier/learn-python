@@ -1430,9 +1430,9 @@ function renderHome(){
  $('#mods').innerHTML=st.map(([t,ic,a,z])=>{
   const ids=[];for(let i=a;i<=Math.min(z,N-1);i++)ids.push(i);
   const dn=ids.filter(i=>done.includes(i)).length;
-  return '<div class="card stg'+(dn===ids.length?' full':'')+'"><div class="sth"><span class="sti">'+(STI[ic]||STI.start)+'</span><b>'+esc(t)+'</b><small>'+dn+' / '+ids.length+'</small></div>'+
-   '<div class="stb"><i style="width:'+Math.round(dn/ids.length*100)+'%"></i></div>'+
-   ids.map(i=>'<button class="ml'+(done.includes(i)?' d':'')+(i===nx?' nx':'')+'" data-i="'+i+'"><b>'+(done.includes(i)?CHECK:numIn(i))+'</b><span>'+esc(LESSONS[i].s||LESSONS[i].t)+(COURSE.mk&&COURSE.mk[i]?'<small>'+esc(COURSE.mk[i])+'</small>':'')+'</span>'+(i===nx?'<em>далі</em>':'')+'</button>').join('')+'</div>';
+  return '<div class="card stg'+(dn===ids.length?' full':'')+'"><div class="sth"><span class="sti">'+(STI[ic]||STI.start)+'</span><div class="stn"><b>'+esc(t)+'</b><small>'+dn+' з '+ids.length+'</small>'+
+   '<div class="stb"><i style="width:'+Math.round(dn/ids.length*100)+'%"></i></div></div></div><div class="stl">'+
+   ids.map(i=>'<button class="ml'+(done.includes(i)?' d':'')+(i===nx?' nx':'')+'" data-i="'+i+'"><b>'+(done.includes(i)?CHECK:numIn(i))+'</b><span>'+esc(LESSONS[i].s||LESSONS[i].t)+(COURSE.mk&&COURSE.mk[i]?'<small>'+esc(COURSE.mk[i])+'</small>':'')+'</span>'+(i===nx?'<em>далі</em>':'')+'</button>').join('')+'</div></div>';
  }).join('');
 }
 const STI={
