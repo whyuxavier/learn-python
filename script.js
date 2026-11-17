@@ -1424,12 +1424,27 @@ function renderHome(){
  $('#startTx').textContent=started?'Продовжити: урок '+numIn(cur):'Почати навчання';
  const p=Math.round(done.length/N*100);
  $('#hpr').hidden=!done.length;$('#hprTx').textContent=(store.get('name','')?store.get('name','').split(' ')[0]+', пройдено ':'Пройдено ')+done.length+' з '+N+' уроків';$('#hprBar').style.width=p+'%';
- $('#mods').innerHTML=[0].map(()=>{
-  const ls=LESSONS.map((l,i)=>[l,i]);
-  return '<div class="card mds"><span class="mn">'+COURSE.g+' клас · '+ls.length+' уроків</span><h4>'+esc(COURSE.title)+'</h4>'+
-   '<div class="mll" style="--rows:'+Math.ceil(ls.length/2)+'">'+ls.map(([l,i])=>'<button class="ml'+(done.includes(i)?' d':'')+'" data-i="'+i+'"><b>'+(done.includes(i)?CHECK:numIn(i))+'</b><span>'+esc(l.s||l.t)+'</span></button>').join('')+'</div></div>';
+ /* програма курсу: етапи з прогресом; у кожного уроку — що учень створить */
+ const nx=LESSONS.findIndex((l,i)=>!done.includes(i));
+ const st=COURSE.stages||[[COURSE.title,'start',0,N-1]];
+ $('#mods').innerHTML=st.map(([t,ic,a,z])=>{
+  const ids=[];for(let i=a;i<=Math.min(z,N-1);i++)ids.push(i);
+  const dn=ids.filter(i=>done.includes(i)).length;
+  return '<div class="card stg'+(dn===ids.length?' full':'')+'"><div class="sth"><span class="sti">'+(STI[ic]||STI.start)+'</span><b>'+esc(t)+'</b><small>'+dn+' / '+ids.length+'</small></div>'+
+   '<div class="stb"><i style="width:'+Math.round(dn/ids.length*100)+'%"></i></div>'+
+   ids.map(i=>'<button class="ml'+(done.includes(i)?' d':'')+(i===nx?' nx':'')+'" data-i="'+i+'"><b>'+(done.includes(i)?CHECK:numIn(i))+'</b><span>'+esc(LESSONS[i].s||LESSONS[i].t)+(COURSE.mk&&COURSE.mk[i]?'<small>'+esc(COURSE.mk[i])+'</small>':'')+'</span>'+(i===nx?'<em>далі</em>':'')+'</button>').join('')+'</div>';
  }).join('');
 }
+const STI={
+ start:'<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+ data:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5"/></svg>',
+ loop:'<svg viewBox="0 0 24 24"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg>',
+ win:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></svg>',
+ game:'<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15.5 12h.01M18 13.5h.01"/></svg>',
+ list:'<svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>',
+ fn:'<svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3 1-3 3v2c0 1.5-1 3-2 3 1 0 2 1.5 2 3v2c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1.5 1 3 2 3-1 0-2 1.5-2 3v2c0 2-1 3-3 3"/></svg>',
+ file:'<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>'
+};
 /* окреме посилання на кожен урок: …/#urok-1; старі адреси #8-urok-N і #9-urok-N теж працюють */
 const LH=i=>'#urok-'+numIn(i);
 const hashLesson=()=>{const m=/^#(?:(8|9)-)?urok-(\d+)$/.exec(location.hash);if(!m)return -1;const n=+m[2];
