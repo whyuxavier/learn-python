@@ -378,11 +378,51 @@ body.dragy{user-select:none;cursor:row-resize}.dragy iframe{pointer-events:none}
 .ws:has(.pane.shut) .rzh{visibility:hidden}.ws:has(.pane.shut) #p-ed{flex:1}
 @media(max-width:1100px){.rzh{height:20px}.rzh::after{top:8px}.ws.sized #p-ed,.ws.sized #p-out{flex:none}.ws.sizedm .ed{height:var(--eh)}}
 
-/* перемикач «8 клас | 9 клас» у шапці */
-.gsw{display:flex;padding:3px;border:1px solid var(--bd);border-radius:12px;background:var(--sf2);flex:none}
-.gsw a{padding:4px 11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--mu);text-decoration:none;white-space:nowrap}
-.gsw a:hover{color:var(--tx)}
-.gsw a[aria-current]{background:var(--ac);color:#fff}
-.gsw a span{margin-left:3px}
-@media(max-width:520px){.gsw a{padding:4px 9px}.gsw a span{display:none}}
 .promo.nx{margin-top:0}
+
+/* ---------- перемикач класу ---------- */
+.gsw{position:relative;flex:none}
+.gsb{display:flex;align-items:center;gap:4px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);border-radius:10px;padding:6px 8px 6px 12px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.gsb:hover{border-color:var(--ac)}.gsb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .15s}
+.gsb[aria-expanded=true] svg{transform:rotate(180deg)}
+.gpop{position:absolute;right:0;top:calc(100% + 8px);z-index:40;width:260px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh);padding:6px;display:flex;flex-direction:column;gap:4px}
+.gpop[hidden]{display:none}
+.gpop a{display:block;padding:9px 12px;border-radius:10px;color:var(--tx);text-decoration:none;border:1px solid transparent}
+.gpop a b{display:block;font-size:15px}.gpop a span{font-size:13px;color:var(--mu)}
+.gpop a[href]:hover{background:var(--bd)}
+.gpop a[aria-current]{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,transparent)}
+.gpop a[aria-current] b::after{content:" · поточний";font-weight:500;font-size:12px;color:var(--ac)}
+#instB{display:none!important}
+/* ---------- панель керування (праворуч) ---------- */
+#modal{place-items:stretch end;padding:0}
+#modal .mc{max-width:400px;height:100%;max-height:none;border-radius:0;border-width:0 0 0 1px;padding:22px 20px 28px;animation:pin .18s ease-out}
+@keyframes pin{from{transform:translateX(24px);opacity:.6}}
+@media(prefers-reduced-motion:reduce){#modal .mc{animation:none}}
+#modal h2{margin:0 0 14px;font-size:18px;color:var(--tx)}
+.pset{display:flex;flex-direction:column;gap:2px}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0}
+.prow>span{font-weight:500}
+.seg#theme button{display:flex;align-items:center;gap:5px;padding:0 10px}
+#theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.seg{display:flex;border:1px solid var(--bd);border-radius:10px;padding:2px;gap:2px}
+.seg button{border:0;background:none;color:var(--mu);font:inherit;font-weight:600;min-width:38px;height:30px;border-radius:8px;cursor:pointer;line-height:1}
+.seg button[aria-pressed=true]{background:var(--ac);color:#fff}
+.pab{margin-top:14px}
+/* ---------- урок: менше рамок ---------- */
+.lhd{padding:2px 4px}
+.lhd .sit{color:var(--tx);opacity:.82}
+.card.th .sh{font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ac);margin:24px 0 6px;font-weight:600}
+.exh h4{margin:0;font-size:15px;font-weight:600}
+details.more{margin-top:16px;border-top:1px solid var(--bd);padding-top:4px}
+details.more>summary{cursor:pointer;padding:8px 0;font-weight:600;color:var(--ac);list-style:none;display:flex;align-items:center;gap:6px}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+details.more[open]>summary::before{transform:rotate(45deg)}
+details.more ul{margin:2px 0 6px;padding-left:20px}details.more li{margin:5px 0}
+.tq{margin:0 0 4px;font-weight:600;font-size:16.5px;line-height:1.5}
+#pct{display:none}.pc{margin-bottom:6px}
+/* ---------- розмір тексту й доступність ---------- */
+#lesson{zoom:var(--fs,1)}
+#con{font-size:calc(13.5px * var(--fs,1))}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+@media(max-width:520px){.gsb{padding:6px 6px 6px 10px;font-size:13.5px}.gpop{right:-48px}}

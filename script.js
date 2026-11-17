@@ -67,8 +67,8 @@ function snowSync(){
  s.onerror=()=>{snowState=3;snowBox.remove()};
  document.head.appendChild(s);
 }
-function setTheme(t,manual){document.documentElement.dataset.theme=t;$('#theme').innerHTML=t==='dark'?ICON.sun:ICON.moon;$('#theme').setAttribute('aria-label',t==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему');if(manual)store.set('themeC',t);snowSync()}
-$('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',true);
+function setTheme(t,manual){document.documentElement.dataset.theme=t;$('#theme').innerHTML='<button type="button" data-t="light" aria-pressed="'+(t==='light')+'">'+ICON.sun+'Світла</button><button type="button" data-t="dark" aria-pressed="'+(t==='dark')+'">'+ICON.moon+'Темна</button>';if(manual)store.set('themeC',t);snowSync()}
+$('#theme').onclick=e=>{const b=e.target.closest('button');if(b&&b.dataset.t!==document.documentElement.dataset.theme)setTheme(b.dataset.t,true)};
 // Темна тема — за замовчуванням; світла лише якщо учень сам її обрав (themeC).
 setTheme(store.get('themeC','dark')==='light'?'light':'dark');
 const numIn=i=>COURSE.zero?i:i+1;   // zero: курс починається з уроку 0 «Знайомство»
@@ -127,7 +127,7 @@ function renderTabs(){
  let h='';
  files.forEach((f,i)=>{h+='<button class="tab" role="tab" data-f="'+i+'" aria-selected="'+(i===file)+'">'+esc(f[0])+(multi&&i>0&&l.multi?'<span class="x" data-del="'+i+'" aria-label="Видалити файл" title="Видалити файл"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span>':'')+'</button>'});
  if(l.multi)h+='<button class="tab" id="addf" aria-label="Новий файл" title="Новий файл">+</button>';
- $('#ftabs').innerHTML=h;
+ $('#ftabs').innerHTML=multi?h:'';
 }
 function loadEditor(){
  try{AC.hide()}catch(e){}
@@ -1267,10 +1267,9 @@ function renderNav(){
  LESSONS.forEach((l,i)=>{
   h+='<button class="li'+(done.includes(i)?' d':'')+'" data-i="'+i+'" aria-current="'+(i===cur)+'"><b>'+CHECK+'</b><span>'+numIn(i)+'. '+esc(l.s||l.t)+'</span></button>';
  });
- h+='<div class="mod">Головна</div><button class="li bn" data-home="1"><b>'+STAR+'</b><span>Програма курсу і бонус</span></button><button class="li bn" data-home="quests"><b>'+STAR+'</b><span>Квести й тести</span></button>';
- $('#nav').innerHTML=h;
+  $('#nav').innerHTML=h;
  const p=Math.round(done.length/N*100);
- $('#pct').textContent=p+'%';$('#cnt').textContent=done.length+' / '+N;
+ $('#pct').textContent=p+'%';$('#cnt').textContent='Пройдено '+done.length+' з '+N;
  $('#pbar').firstElementChild.style.width=p+'%';$('#pbar').setAttribute('aria-valuenow',p);
 }
 const PGZ_STEPS='<h4>Як запустити гру на Pygame Zero</h4><ol>'+
@@ -1323,15 +1322,15 @@ function renderLesson(){
  const l=L(),d=done.includes(cur),chk=store.get('chk:'+cur,[]);
  $('#lesson').innerHTML=
  '<div class="lp" id="p-th" role="tabpanel" aria-labelledby="t-th">'+
- '<div class="card"><h2 class="t">'+esc(l.t)+'</h2>'+(l.sit?'<p class="sit">'+l.sit+'</p>':'')+'</div>'+
- '<div class="card th"><h2>Теорія</h2>'+l.th+'</div>'+
- '<div class="card"><h2>Команди та функції</h2>'+l.cm.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>'+
- '<div class="card">'+EXS(l).map((x,k,a)=>'<div class="exh'+(k?' nx':'')+'"><h2>'+(x.t?esc(x.t):a.length>1?'Приклад '+(k+1):'Приклад коду')+'</h2><div class="acts">'+(l.pgz||l.noRun?'':'<button class="btn" data-run="'+k+'" title="Запустити приклад">'+PLAY+'Запустити</button>')+'<button class="btn" data-cp="'+k+'">Копіювати</button></div></div>'+(x.d?'<p class="exd">'+x.d+'</p>':'')+'<pre><code>'+hlPy(x.c)+'</code></pre>').join('')+'</div>'+
- (l.how?'<div class="card"><h2>Як це працює</h2>'+l.how.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>':'')+
- (l.err?'<div class="card warn"><h2>Часті помилки</h2><ul>'+l.err.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>':'')+
+ '<div class="lhd"><h2 class="t">'+esc(l.t)+'</h2>'+(l.sit?'<p class="sit">'+l.sit+'</p>':'')+'</div>'+
+ '<div class="card th">'+l.th+
+ '<h3 class="sh">Команди</h3>'+l.cm.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+
+ '<h3 class="sh">'+(EXS(l).length>1?'Приклади':'Приклад')+'</h3>'+EXS(l).map((x,k,a)=>'<div class="exh'+(k?' nx':'')+'"><h4>'+(x.t?esc(x.t):a.length>1?'Приклад '+(k+1):'')+'</h4><div class="acts">'+(l.pgz||l.noRun?'':'<button class="btn" data-run="'+k+'" title="Запустити приклад">'+PLAY+'Запустити</button>')+'<button class="btn" data-cp="'+k+'">Копіювати</button></div></div>'+(x.d?'<p class="exd">'+x.d+'</p>':'')+'<pre><code>'+hlPy(x.c)+'</code></pre>').join('')+
+ (l.how?'<details class="more"><summary>Розбір прикладів</summary>'+l.how.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</details>':'')+
+ (l.err?'<details class="more"><summary>Часті помилки</summary><ul>'+l.err.map(x=>'<li>'+x+'</li>').join('')+'</ul></details>':'')+'</div>'+
  '<button class="btn pr tonext" id="toTask">До завдання →</button></div>'+
  '<div class="lp" id="p-tk" role="tabpanel" aria-labelledby="t-tk">'+
- '<div class="card task"><h2>Практичне завдання</h2><p><b>'+esc(l.task)+'</b></p>'+
+ '<div class="card task"><p class="tq">'+esc(l.task)+'</p>'+
  (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
  '<h3 class="sub">Вимоги</h3><ul class="chk">'+
   l.ok.map((x,i)=>'<li'+((AUTO[cur]||[])[i]?' class="au" title="Перевіряється автоматично"':'')+'><label><input type="checkbox" data-c="'+i+'"'+(chk.includes(i)?' checked':'')+'><span>'+x+((AUTO[cur]||[])[i]?AUTO_ICON:'')+'</span></label></li>').join('')+'</ul>'+
@@ -1424,7 +1423,7 @@ function renderHome(){
  const started=done.length>0||cur>0||store.get('started',false);
  $('#startTx').textContent=started?'Продовжити: урок '+numIn(cur):'Почати навчання';
  const p=Math.round(done.length/N*100);
- $('#hpr').hidden=!done.length;$('#hprTx').textContent='Пройдено '+done.length+' з '+N+' уроків';$('#hprBar').style.width=p+'%';
+ $('#hpr').hidden=!done.length;$('#hprTx').textContent=(store.get('name','')?store.get('name','').split(' ')[0]+', пройдено ':'Пройдено ')+done.length+' з '+N+' уроків';$('#hprBar').style.width=p+'%';
  $('#mods').innerHTML=[0].map(()=>{
   const ls=LESSONS.map((l,i)=>[l,i]);
   return '<div class="card mds"><span class="mn">'+COURSE.g+' клас · '+ls.length+' уроків</span><h4>'+esc(COURSE.title)+'</h4>'+
@@ -1459,6 +1458,18 @@ $('#mods').onclick=e=>{const b=e.target.closest('.ml');if(b)openCourse(+b.datase
 $('#toProg').onclick=e=>{e.preventDefault();$('#program').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
 $('#logo').onclick=showHome;$('#homeBtn').onclick=showHome;$('#navHome').onclick=()=>{closeMenu();showHome()};
 addEventListener('popstate',route);addEventListener('hashchange',route);
+/* ---------- перемикач класу ---------- */
+(()=>{const b=$('#gsb'),p=$('#gpop');if(!b)return;
+ const close=()=>{p.hidden=true;b.setAttribute('aria-expanded','false')};
+ b.onclick=e=>{e.stopPropagation();const o=p.hidden;p.hidden=!o;b.setAttribute('aria-expanded',o);if(o)p.querySelector('a').focus()};
+ document.addEventListener('click',e=>{if(!p.hidden&&!e.target.closest('.gsw'))close()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!p.hidden){close();b.focus()}});
+})();
+/* ---------- розмір тексту: 1 / 1.15 / 1.3 ---------- */
+function setFs(v){v=[1,1.15,1.3].includes(+v)?+v:1;document.documentElement.style.setProperty('--fs',v);store.set('fs',v);
+ document.querySelectorAll('#fsz button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===v))}
+setFs(store.get('fs',1));
+$('#fsz').onclick=e=>{const b=e.target.closest('button');if(b)setFs(b.dataset.v)};
 function closeMenu(){$('#side').classList.remove('open');$('#menu').setAttribute('aria-expanded','false')}
 /* після вибору уроку меню ховається й на ПК; відкрити знову — кнопкою ☰ */
 function hideSide(){if(!matchMedia('(max-width:1100px)').matches&&!ui.side){ui.side=true;store.set('ui',ui);applyUI();$('#menu').setAttribute('aria-expanded','false')}}
@@ -1583,7 +1594,7 @@ function renderShared(){
  const l=LESSONS[shared.l],dt=shared.d?new Date(shared.d).toLocaleString('uk-UA',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
  $('#lesson').innerHTML='<div class="card svh"><span class="meta">Робота учня</span><div class="who">'+esc(shared.n)+'</div><div class="meta">'+(shared.v!==(COURSE.ver||1)?'Попередня версія курсу':esc(l.t))+(dt?' · '+dt:'')+'</div>'+
  '<div class="acts"><button class="btn pr" id="svEd">Відкрити в редакторі</button><button class="btn" id="svX">Закрити перегляд</button></div></div>'+
- (shared.v!==(COURSE.ver||1)?'<div class="card task"><p>Робота з попередньої версії курсу: завдання уроку відтоді змінилося.</p></div>':'<div class="card task"><h2>Практичне завдання</h2><p><b>'+esc(l.task)+'</b></p>'+
+ (shared.v!==(COURSE.ver||1)?'<div class="card task"><p>Робота з попередньої версії курсу: завдання уроку відтоді змінилося.</p></div>':'<div class="card task"><p class="tq">'+esc(l.task)+'</p>'+
  (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
  '<h3 class="sub">Вимоги</h3><ul>'+l.ok.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>');
  $('#lw').scrollTop=0;pgzUI(l);
