@@ -69,7 +69,7 @@ function setTheme(t,manual){document.documentElement.dataset.theme=t;$('#theme')
 $('#theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',true);
 // Темна тема — за замовчуванням; світла лише якщо учень сам її обрав (themeC).
 setTheme(store.get('themeC','dark')==='light'?'light':'dark');
-const numIn=i=>i+1;
+const numIn=i=>COURSE.zero?i:i+1;   // zero: курс починається з уроку 0 «Знайомство»
 
 /* ---------- підсвітка Python ---------- */
 const E=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1315,14 +1315,16 @@ function evalChecks(fromEdit){
   toast('Усі вимоги виконано — урок завершено!')}
  chkAll=all;
 }
+/* приклади уроку: exs — кілька маленьких програм {t: назва, d: опис, c: код}; ex — один приклад (старий формат) */
+const EXS=l=>l.exs||[{c:l.ex||''}];
 function renderLesson(){
  const l=L(),d=done.includes(cur),chk=store.get('chk:'+cur,[]);
  $('#lesson').innerHTML=
  '<div class="lp" id="p-th" role="tabpanel" aria-labelledby="t-th">'+
- '<div class="card"><h2 class="t">'+esc(l.t)+'</h2></div>'+
+ '<div class="card"><h2 class="t">'+esc(l.t)+'</h2>'+(l.sit?'<p class="sit">'+l.sit+'</p>':'')+'</div>'+
  '<div class="card th"><h2>Теорія</h2>'+l.th+'</div>'+
  '<div class="card"><h2>Команди та функції</h2>'+l.cm.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>'+
- '<div class="card"><div class="exh"><h2>Приклад коду</h2><div class="acts">'+(l.pgz||l.noRun?'':'<button class="btn" id="runEx" title="Запустити приклад">'+PLAY+'Запустити</button>')+'<button class="btn" id="cpex">Копіювати</button></div></div><pre><code>'+hlPy(l.ex)+'</code></pre></div>'+
+ '<div class="card">'+EXS(l).map((x,k,a)=>'<div class="exh'+(k?' nx':'')+'"><h2>'+(x.t?esc(x.t):a.length>1?'Приклад '+(k+1):'Приклад коду')+'</h2><div class="acts">'+(l.pgz||l.noRun?'':'<button class="btn" data-run="'+k+'" title="Запустити приклад">'+PLAY+'Запустити</button>')+'<button class="btn" data-cp="'+k+'">Копіювати</button></div></div>'+(x.d?'<p class="exd">'+x.d+'</p>':'')+'<pre><code>'+hlPy(x.c)+'</code></pre>').join('')+'</div>'+
  (l.how?'<div class="card"><h2>Як це працює</h2>'+l.how.map(c=>'<div class="cmd"><code>'+esc(c[0])+'</code><span>'+c[1]+'</span></div>').join('')+'</div>':'')+
  (l.err?'<div class="card warn"><h2>Часті помилки</h2><ul>'+l.err.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>':'')+
  '<button class="btn pr tonext" id="toTask">До завдання →</button></div>'+
@@ -1343,8 +1345,8 @@ function renderLesson(){
  $('#toTask').onclick=()=>setTab('tk');
  $('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>cur===N-1?showHome():go(cur+1);
  $('#mark').onclick=()=>{done=done.includes(cur)?done.filter(x=>x!==cur):done.concat(cur);store.set('done',done);renderNav();renderLesson();toast(done.includes(cur)?'Урок завершено':'Позначку знято')};
- const re=$('#runEx');if(re)re.onclick=()=>runCode(l.ex);
- $('#cpex').onclick=()=>copyText(l.ex).then(()=>toast('Приклад скопійовано'),()=>toast('Не вдалося скопіювати'));
+ document.querySelectorAll('#p-th [data-run]').forEach(b=>b.onclick=()=>runCode(EXS(l)[+b.dataset.run].c));
+ document.querySelectorAll('#p-th [data-cp]').forEach(b=>b.onclick=()=>copyText(EXS(l)[+b.dataset.cp].c).then(()=>toast('Приклад скопійовано'),()=>toast('Не вдалося скопіювати')));
  $('#lesson .chk').onchange=e=>{const c=+e.target.dataset.c;let a=store.get('chk:'+cur,[]);a=e.target.checked?a.concat(c):a.filter(x=>x!==c);store.set('chk:'+cur,a);evalChecks(true)};
  chkAll=false;evalChecks(false);
  pgzUI(l);
@@ -1431,7 +1433,7 @@ function renderHome(){
 const LH=i=>'#urok-'+numIn(i);
 const hashLesson=()=>{const m=/^#(?:(8|9)-)?urok-(\d+)$/.exec(location.hash);if(!m)return -1;const n=+m[2];
  if(m[1]&&+m[1]!==COURSE.g){location.replace(COURSE.other.url+'#urok-'+n);return -2}
- const i=n-1;return n>=1&&i<N?i:-2};
+ const i=COURSE.zero?n:n-1;return i>=0&&i<N?i:-2};
 const isCourse=()=>location.hash==='#course'||hashLesson()!==-1;
 let routed=false;
 function syncHash(){if(routed&&!shared&&isCourse()&&location.hash!==LH(cur))history.replaceState(null,'',location.pathname+location.search+LH(cur))}
@@ -1555,7 +1557,7 @@ $('#shgo').onclick=async()=>{
  const n=$('#shn').value.trim().replace(/\s+/g,' ');
  if(n.length<3){toast('Введи прізвище та ім\'я');$('#shn').focus();return}
  store.set('name',n);
- const o={n,l:cur,d:Date.now(),f:files.map(f=>[f[0],f[1]])};
+ const o={n,l:cur,d:Date.now(),f:files.map(f=>[f[0],f[1]]),v:COURSE.ver||1};
  $('#shu').value=location.origin+location.pathname+'#s='+await pack(o);
  $('#shres').hidden=false;$('#shu').select();
 };
@@ -1569,7 +1571,7 @@ async function openShared(s){
   if(!(Number.isInteger(o.l)&&o.l>=0&&o.l<N&&Array.isArray(o.f)&&o.f.length))throw 0;
  }catch(e){toast(e&&e.message==='old'?'Онови браузер, щоб відкрити роботу':'Посилання пошкоджене');history.replaceState(null,'',location.pathname+location.search);route();return}
  if(R.running)stopCode();
- shared={n:String(o.n||'Без імені').slice(0,60),l:o.l,d:o.d,f:o.f.slice(0,20).map(f=>[String(f[0]||'main.py').slice(0,40),String(f[1]||'')])};
+ shared={n:String(o.n||'Без імені').slice(0,60),l:o.l,d:o.d,v:o.v||1,f:o.f.slice(0,20).map(f=>[String(f[0]||'main.py').slice(0,40),String(f[1]||'')])};
  document.body.classList.remove('home');document.body.classList.add('sv');snowSync();closeMenu();
  cur=shared.l;files=shared.f.map(f=>[f[0],f[1]]);file=0;ta.readOnly=true;
  renderShared();loadEditor();CON.clear();TK.reset();TT.reset();R.ui();window.scrollTo(0,0);
@@ -1579,9 +1581,9 @@ function renderShared(){
  const l=LESSONS[shared.l],dt=shared.d?new Date(shared.d).toLocaleString('uk-UA',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
  $('#lesson').innerHTML='<div class="card svh"><span class="meta">Робота учня</span><div class="who">'+esc(shared.n)+'</div><div class="meta">'+esc(l.t)+(dt?' · '+dt:'')+'</div>'+
  '<div class="acts"><button class="btn pr" id="svEd">Відкрити в редакторі</button><button class="btn" id="svX">Закрити перегляд</button></div></div>'+
- '<div class="card task"><h2>Практичне завдання</h2><p><b>'+esc(l.task)+'</b></p>'+
+ (shared.v!==(COURSE.ver||1)?'<div class="card task"><p>Робота з попередньої версії курсу: завдання уроку відтоді змінилося.</p></div>':'<div class="card task"><h2>Практичне завдання</h2><p><b>'+esc(l.task)+'</b></p>'+
  (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
- '<h3 class="sub">Вимоги</h3><ul>'+l.ok.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>';
+ '<h3 class="sub">Вимоги</h3><ul>'+l.ok.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>');
  $('#lw').scrollTop=0;pgzUI(l);
  let armed=false;
  $('#svEd').onclick=e=>{
