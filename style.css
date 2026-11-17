@@ -298,7 +298,9 @@ svg.art{width:100%;height:auto;display:block;fill:var(--tx);stroke:none;stroke-w
 .sec{margin-top:40px}
 .sec>h3{font-size:24px;margin:0 0 4px;letter-spacing:-.01em}
 .sec>p{margin:0 0 16px;color:var(--mu)}
-.mods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.mods{display:grid;grid-template-columns:1fr;gap:14px}
+.mll{display:grid;grid-template-rows:repeat(var(--rows),auto);grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);column-gap:36px}
+@media(max-width:700px){.mll{grid-template-rows:none;grid-auto-flow:row}}
 .mds h4{margin:6px 0 8px;font-size:17px}
 .mn{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ac)}
 .ml{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:6px 8px;margin:0 -8px;border-radius:9px;text-align:left;font-size:14px;line-height:1.35}

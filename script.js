@@ -1261,7 +1261,7 @@ const TT={
 };
 /* ---------- уроки ---------- */
 function renderNav(){
- let h='<div class="mod">'+COURSE.g+' клас</div>';
+ let h='';
  LESSONS.forEach((l,i)=>{
   h+='<button class="li'+(done.includes(i)?' d':'')+'" data-i="'+i+'" aria-current="'+(i===cur)+'"><b>'+CHECK+'</b><span>'+numIn(i)+'. '+esc(l.s||l.t)+'</span></button>';
  });
@@ -1413,7 +1413,7 @@ const qcard=q=>'<a class="card qc" href="'+q.u+'" target="_blank" rel="noopener 
 $('#qlist').innerHTML=QUESTS.filter(q=>q.m===COURSE.g-8||q.m==null).map(qcard).join('');
 const LNK=a=>a.map(x=>'<a class="lk" href="'+x[0]+'" target="_blank" rel="noopener noreferrer"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></a>').join('');
 $('#bonus').innerHTML='<div class="card"><h2>Інструменти</h2><div class="lks">'+LNK(TOOLS)+'</div></div>'+
- '<div class="card"><h2>Безкоштовні відеокурси на YouTube</h2><div class="lks">'+LNK(VIDEO)+'</div></div>';
+ '<div class="card"><h2>Безкоштовні відеокурси на YouTube</h2><div class="lks">'+LNK(VIDEO.filter(v=>!/· [89] клас$/.test(v[1])||v[1].endsWith('· '+COURSE.g+' клас')))+'</div></div>';
 
 /* ---------- головна ---------- */
 function renderHome(){
@@ -1424,7 +1424,7 @@ function renderHome(){
  $('#mods').innerHTML=[0].map(()=>{
   const ls=LESSONS.map((l,i)=>[l,i]);
   return '<div class="card mds"><span class="mn">'+COURSE.g+' клас · '+ls.length+' уроків</span><h4>'+esc(COURSE.title)+'</h4>'+
-   ls.map(([l,i])=>'<button class="ml'+(done.includes(i)?' d':'')+'" data-i="'+i+'"><b>'+(done.includes(i)?CHECK:numIn(i))+'</b><span>'+esc(l.s||l.t)+'</span></button>').join('')+'</div>';
+   '<div class="mll" style="--rows:'+Math.ceil(ls.length/2)+'">'+ls.map(([l,i])=>'<button class="ml'+(done.includes(i)?' d':'')+'" data-i="'+i+'"><b>'+(done.includes(i)?CHECK:numIn(i))+'</b><span>'+esc(l.s||l.t)+'</span></button>').join('')+'</div></div>';
  }).join('');
 }
 /* окреме посилання на кожен урок: …/#urok-1; старі адреси #8-urok-N і #9-urok-N теж працюють */
