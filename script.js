@@ -1587,7 +1587,7 @@ try{localStorage.removeItem('lp:queue');localStorage.removeItem('lp:sheet')}catc
 function openShare(){
  $('#shl').textContent=L().t;
  $('#shk').value=store.get('klas','');
- $('#shn').value=store.get('name','');$('#shres').hidden=true;shm.hidden=false;$('#shn').focus();
+ $('#shn').value=store.get('name','');$('#shres').hidden=true;$('#shgo').style.display='';shm.hidden=false;$('#shn').focus();
 }
 function closeShare(){shm.hidden=true;$('#share').focus()}
 const mm=$('#mm'),moreB=$('#more');
@@ -1597,9 +1597,9 @@ mm.addEventListener('click',()=>closeMore());
 document.addEventListener('click',e=>{if(!mm.hidden&&!e.target.closest('.more'))closeMore()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!mm.hidden){closeMore();moreB.focus()}});
 $('#share').onclick=openShare;$('#shclose').onclick=closeShare;shm.onclick=e=>{if(e.target===shm)closeShare()};
-$('#shn').oninput=()=>{$('#shres').hidden=true};
+$('#shn').oninput=()=>{$('#shres').hidden=true;$('#shgo').style.display=''};
 $('#shn').onkeydown=e=>{if(e.key==='Enter')$('#shgo').click()};
-$('#shk').oninput=()=>{$('#shres').hidden=true};
+$('#shk').oninput=()=>{$('#shres').hidden=true;$('#shgo').style.display=''};
 $('#shk').onkeydown=e=>{if(e.key==='Enter')$('#shgo').click()};
 $('#shgo').onclick=async()=>{
  const n=$('#shn').value.trim().replace(/\s+/g,' ');
@@ -1612,7 +1612,7 @@ $('#shgo').onclick=async()=>{
  const link=location.origin+location.pathname+'#s='+await pack(o);
  $('#shu').value=link;
  $('#shsc').textContent='Бал за вимогами: '+g.s+' з 12'+(g.miss.length?'. Не виконано: '+g.miss.join(', '):'. Усі вимоги виконано!');
- $('#shres').hidden=false;$('#shu').select();
+ $('#shres').hidden=false;$('#shgo').style.display='none';$('#shcp').focus();
 };
 $('#shcp').onclick=()=>copyText($('#shu').value).then(()=>toast('Посилання скопійовано'),()=>{$('#shu').select();toast('Скопіюй вручну: Ctrl+C')});
 
