@@ -1550,7 +1550,12 @@ $('#pFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)retur
  .catch(()=>toast('Це не файл прогресу цього курсу'));
 };
 $('#info').onclick=openInfo;$('#mclose').onclick=closeInfo;modal.onclick=e=>{if(e.target===modal)closeInfo()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();if(!modal.hidden)closeInfo();if(!shm.hidden)closeShare()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();if(!modal.hidden)closeInfo();if(!shm.hidden)closeShare();if(!annm.hidden)closeAnn()}});
+/* одноразове оголошення про зміни в курсі */
+const annm=$('#annm');
+function closeAnn(){annm.hidden=true;store.set('ann1',1)}
+$('#annok').onclick=closeAnn;$('#annclose').onclick=closeAnn;annm.onclick=e=>{if(e.target===annm)closeAnn()};
+if(!store.get('ann1',0)&&!/^#s=/.test(location.hash))setTimeout(()=>{if(shm.hidden&&modal.hidden){annm.hidden=false;$('#annok').focus()}},600);
 
 /* ---------- здача роботи посиланням ---------- */
 const b64u=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
@@ -1577,24 +1582,11 @@ function gradeOf(i,fl){
   if((rules[j]&&autoTest(rules[j],c,fl,raw))||man.includes(j))sc+=w;else if(!B[j])miss.push(j+1)});
  return {s:Math.max(1,Math.round(sc)),miss};
 }
-/* ---------- надсилання робіт у Google Таблицю вчителя ----------
-   Адреса вебзастосунку Apps Script — у COURSE.sheet (або ?sheet=адреса для цього пристрою).
-   Без інтернету робота чекає в черзі й надсилається, щойно з'явиться зв'язок. */
-(()=>{try{const u=new URL(location.href),q=u.searchParams.get('sheet');if(q!==null){
- if(/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(q))localStorage.setItem('lp:sheet',q);else localStorage.removeItem('lp:sheet');
- u.searchParams.delete('sheet');history.replaceState(null,'',u.pathname+u.search+u.hash)}}catch(e){}})();
-const SHEET=()=>{try{return localStorage.getItem('lp:sheet')||COURSE.sheet||''}catch(e){return COURSE.sheet||''}};
-const QK='lp:queue';
-function queue(){try{return JSON.parse(localStorage.getItem(QK)||'[]')}catch(e){return[]}}
-function setQueue(a){try{localStorage.setItem(QK,JSON.stringify(a.slice(-30)))}catch(e){}}
-async function sendRow(row){const u=SHEET();if(!u)return false;
- try{await fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(row)});return true}catch(e){return false}}
-let flushing=false;
-async function flushQueue(){if(flushing||!navigator.onLine)return;const q=queue();if(!q.length)return;flushing=true;setQueue([]);const left=[];for(const r of q)if(!await sendRow(r))left.push(r);if(left.length)setQueue(queue().concat(left));flushing=false}
-addEventListener('online',flushQueue);setTimeout(flushQueue,4000);
+/* старі черги надсилання в таблицю більше не потрібні */
+try{localStorage.removeItem('lp:queue');localStorage.removeItem('lp:sheet')}catch(e){}
 function openShare(){
  $('#shl').textContent=L().t;
- $('#shk').value=store.get('klas','');$('#shst').hidden=true;
+ $('#shk').value=store.get('klas','');
  $('#shn').value=store.get('name','');$('#shres').hidden=true;shm.hidden=false;$('#shn').focus();
 }
 function closeShare(){shm.hidden=true;$('#share').focus()}
@@ -1620,15 +1612,6 @@ $('#shgo').onclick=async()=>{
  const link=location.origin+location.pathname+'#s='+await pack(o);
  $('#shu').value=link;
  $('#shsc').textContent='Бал за вимогами: '+g.s+' з 12'+(g.miss.length?'. Не виконано: '+g.miss.join(', '):'. Усі вимоги виконано!');
- const st=$('#shst');st.hidden=!SHEET();
- if(SHEET()){
-  const row={date:new Date().toISOString(),name:n,klas:kl,course:COURSE.g,lesson:numIn(cur),title:L().t,score:g.s,miss:g.miss.join(', '),link,
-   code:files.map(f=>(files.length>1?'# ===== '+f[0]+' =====\n':'')+f[1]).join('\n\n').slice(0,45000)};
-  st.textContent='Надсилаю вчителю…';
-  const ok=navigator.onLine&&await sendRow(row);
-  if(!ok)setQueue(queue().concat(row));
-  st.textContent=ok?'Роботу надіслано вчителю ✓':'Немає інтернету: робота надішлеться сама, щойно з\'явиться зв\'язок';
- }
  $('#shres').hidden=false;$('#shu').select();
 };
 $('#shcp').onclick=()=>copyText($('#shu').value).then(()=>toast('Посилання скопійовано'),()=>{$('#shu').select();toast('Скопіюй вручну: Ctrl+C')});
