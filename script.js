@@ -1469,9 +1469,9 @@ function route(){
 function openCourse(i){if(i!==undefined&&i!==cur)go(i);if(isCourse())route();else location.hash=LH(cur).slice(1)}
 function showHome(){if(isCourse()||shared)history.pushState(null,'',location.pathname+location.search);route()}
 $('#start').onclick=()=>openCourse();
-$('#mods').onclick=e=>{const b=e.target.closest('.ml');if(b)openCourse(+b.dataset.i)};
+$('#mods').onclick=e=>{const b=e.target.closest('.ml');if(b){hideSide();openCourse(+b.dataset.i)}};
 $('#toProg').onclick=e=>{e.preventDefault();$('#program').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
-$('#logo').onclick=showHome;$('#homeBtn').onclick=showHome;$('#navHome').onclick=()=>{closeMenu();showHome()};
+$('#logo').onclick=showHome;$('#homeBtn').onclick=showHome;
 addEventListener('popstate',route);addEventListener('hashchange',route);
 /* ---------- перемикач класу ---------- */
 (()=>{const b=$('#gsb'),p=$('#gpop');if(!b)return;
