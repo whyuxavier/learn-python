@@ -118,6 +118,8 @@ body.sv .lt{visibility:hidden}
 .chk input::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px);opacity:0}
 .chk input:checked{background:var(--ok);border-color:var(--ok)}.chk input:checked::after{opacity:1}
 .chk input:checked+span{color:var(--mu)}
+.chk label,.chk input{cursor:default}.chk input:disabled{opacity:1}
+.chk .tcl{display:inline-block;margin-left:8px;font-size:12px;color:var(--mu);border:1px solid var(--bd);border-radius:20px;padding:0 7px;vertical-align:1px}
 .chk .ai{width:13px;height:13px;margin-left:6px;vertical-align:-1px;fill:var(--ac);stroke:none;opacity:.7}
 .warn{border-left:4px solid var(--gold)}.warn ul{margin:4px 0;padding-left:20px}.warn li{margin:5px 0;font-size:15px}
 h3.sub{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin:14px 0 4px}

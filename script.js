@@ -1304,10 +1304,10 @@ let chkAll=false,chkT=0;
 const AUTO_ICON='<svg class="ai" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/></svg>';
 function evalChecks(fromEdit){
  if(shared||!$('#lesson .chk'))return;
- const l=L(),rules=AUTO[cur]||[],raw=files.map(f=>f[1]).join('\n'),c=noComments(raw),man=store.get('chk:'+cur,[]);
+ const l=L(),rules=AUTO[cur]||[],raw=files.map(f=>f[1]).join('\n'),c=noComments(raw),sub=!!store.get('sub:'+cur,0);
  let all=true;
  l.ok.forEach((x,i)=>{
-  const a=!!rules[i]&&autoTest(rules[i],c,files,raw),on=a||man.includes(i);
+  const on=rules[i]?autoTest(rules[i],c,files,raw):sub;
   const el=$('#lesson .chk input[data-c="'+i+'"]');if(el)el.checked=on;
   if(!isBonus(x)&&!on)all=false;
  });
@@ -1319,7 +1319,7 @@ function evalChecks(fromEdit){
 /* приклади уроку: exs — кілька маленьких програм {t: назва, d: опис, c: код}; ex — один приклад (старий формат) */
 const EXS=l=>l.exs||[{c:l.ex||''}];
 function renderLesson(){
- const l=L(),d=done.includes(cur),chk=store.get('chk:'+cur,[]);
+ const l=L(),d=done.includes(cur);
  $('#lesson').innerHTML=
  '<div class="lp" id="p-th" role="tabpanel" aria-labelledby="t-th">'+
  '<div class="lhd"><h2 class="t">'+esc(l.t)+'</h2>'+(l.sit?'<p class="sit">'+l.sit+'</p>':'')+'</div>'+
@@ -1333,7 +1333,7 @@ function renderLesson(){
  '<div class="card task"><p class="tq">'+esc(l.task)+'</p>'+
  (l.io?'<h3 class="sub">Як має працювати</h3><pre class="io">'+esc(l.io)+'</pre>':'')+
  '<h3 class="sub">Вимоги</h3><ul class="chk">'+
-  l.ok.map((x,i)=>'<li'+((AUTO[cur]||[])[i]?' class="au" title="Перевіряється автоматично"':'')+'><label><input type="checkbox" data-c="'+i+'"'+(chk.includes(i)?' checked':'')+'><span>'+x+((AUTO[cur]||[])[i]?AUTO_ICON:'')+'</span></label></li>').join('')+'</ul>'+
+  l.ok.map((x,i)=>'<li'+((AUTO[cur]||[])[i]?' class="au" title="Перевіряється автоматично"':' class="tc" title="Зараховується під час здачі роботи, перевіряє вчитель"')+'><label><input type="checkbox" data-c="'+i+'" disabled tabindex="-1"><span>'+x+((AUTO[cur]||[])[i]?AUTO_ICON:'<small class="tcl">'+(/^Роботу здано/.test(x)?'після здачі':'перевіряє вчитель')+'</small>')+'</span></label></li>').join('')+'</ul>'+
   (l.hints?'<div class="hints">'+l.hints.map((h,i)=>'<details><summary>Підказка '+(i+1)+'</summary><p>'+h+'</p></details>').join('')+'</div>':'')+
   (l.note?'<p class="hint">'+l.note+'</p>':'')+'</div>'+
  ((cur===15||cur===N-1)?QUESTS.filter(q=>q.m===COURSE.g-8||q.m==null).map(q=>qcard(Object.assign({},q,{d:'Перевір себе: '+q.d}))).join(''):'')+
@@ -1348,7 +1348,6 @@ function renderLesson(){
  $('#mark').onclick=()=>{done=done.includes(cur)?done.filter(x=>x!==cur):done.concat(cur);store.set('done',done);renderNav();renderLesson();toast(done.includes(cur)?'Урок завершено':'Позначку знято')};
  document.querySelectorAll('#p-th [data-run]').forEach(b=>b.onclick=()=>runCode(EXS(l)[+b.dataset.run].c));
  document.querySelectorAll('#p-th [data-cp]').forEach(b=>b.onclick=()=>copyText(EXS(l)[+b.dataset.cp].c).then(()=>toast('Приклад скопійовано'),()=>toast('Не вдалося скопіювати')));
- $('#lesson .chk').onchange=e=>{const c=+e.target.dataset.c;let a=store.get('chk:'+cur,[]);a=e.target.checked?a.concat(c):a.filter(x=>x!==c);store.set('chk:'+cur,a);evalChecks(true)};
  chkAll=false;evalChecks(false);
  pgzUI(l);
 }
@@ -1575,11 +1574,11 @@ const shm=$('#shm');
 /* ---------- оцінка роботи за вимогами «Перевір себе»: 1–12 ----------
    Обов'язкові вимоги разом дають 12 балів (або 10, якщо є бонуси — тоді бонуси дають ще 2). */
 function gradeOf(i,fl){
- const l=LESSONS[i],rules=AUTO[i]||[],raw=fl.map(f=>f[1]).join('\n'),c=noComments(raw),man=shared?[]:store.get('chk:'+i,[]);
+ const l=LESSONS[i],rules=AUTO[i]||[],raw=fl.map(f=>f[1]).join('\n'),c=noComments(raw);
  const B=l.ok.map(isBonus),nm=B.filter(b=>!b).length,nb=B.length-nm,total=nb?10:12,base=Math.floor(total/nm),rem=total%nm;
  let sc=0,k=0;const miss=[];
  l.ok.forEach((x,j)=>{const w=B[j]?2/nb:base+(++k>nm-rem?1:0);
-  if((rules[j]&&autoTest(rules[j],c,fl,raw))||man.includes(j))sc+=w;else if(!B[j])miss.push(j+1)});
+  if(!rules[j]||autoTest(rules[j],c,fl,raw))sc+=w;else if(!B[j])miss.push(j+1)});
  return {s:Math.max(1,Math.round(sc)),miss};
 }
 /* старі черги надсилання в таблицю більше не потрібні */
@@ -1613,6 +1612,7 @@ $('#shgo').onclick=async()=>{
  $('#shu').value=link;
  $('#shsc').textContent='Бал за вимогами: '+g.s+' з 12'+(g.miss.length?'. Не виконано: '+g.miss.join(', '):'. Усі вимоги виконано!');
  $('#shres').hidden=false;$('#shgo').style.display='none';$('#shcp').focus();
+ if(!store.get('sub:'+cur,0)){store.set('sub:'+cur,1);evalChecks(true)}
 };
 $('#shcp').onclick=()=>copyText($('#shu').value).then(()=>toast('Посилання скопійовано'),()=>{$('#shu').select();toast('Скопіюй вручну: Ctrl+C')});
 
