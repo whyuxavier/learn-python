@@ -430,7 +430,7 @@ details.more ul{margin:2px 0 6px;padding-left:20px}details.more li{margin:5px 0}
 @media(max-width:520px){.gsb{padding:6px 6px 6px 10px;font-size:13.5px}.gpop{right:-48px}}
 /* ---------- здача роботи й перегляд ---------- */
 .shsc{margin:12px 0 4px;font-weight:600}
-#annm p{margin:8px 0}.annl{margin:8px 0;padding-left:20px}.annl li{margin:4px 0}.annl a{word-break:break-all}#annok{width:100%;margin-top:10px;justify-content:center}
+.annp{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--sf2);font-size:14px}
 .kl{font-size:14px;font-weight:600;color:var(--ac);border:1px solid var(--ac);border-radius:8px;padding:1px 7px;vertical-align:middle;margin-left:4px}
 .svs{margin:4px 0 2px;font-size:15px}.svs b{font-size:20px;color:var(--ok)}
 body.sv .lh{display:none}

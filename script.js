@@ -1549,12 +1549,7 @@ $('#pFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)retur
  .catch(()=>toast('Це не файл прогресу цього курсу'));
 };
 $('#info').onclick=openInfo;$('#mclose').onclick=closeInfo;modal.onclick=e=>{if(e.target===modal)closeInfo()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();if(!modal.hidden)closeInfo();if(!shm.hidden)closeShare();if(!annm.hidden)closeAnn()}});
-/* одноразове оголошення про зміни в курсі */
-const annm=$('#annm');
-function closeAnn(){annm.hidden=true;store.set('ann1',1)}
-$('#annok').onclick=closeAnn;$('#annclose').onclick=closeAnn;annm.onclick=e=>{if(e.target===annm)closeAnn()};
-if(!store.get('ann1',0)&&!/^#s=/.test(location.hash))setTimeout(()=>{if(shm.hidden&&modal.hidden){annm.hidden=false;$('#annok').focus()}},600);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();if(!modal.hidden)closeInfo();if(!shm.hidden)closeShare()}});
 
 /* ---------- здача роботи посиланням ---------- */
 const b64u=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
