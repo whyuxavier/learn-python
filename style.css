@@ -457,3 +457,18 @@ body.sv .lh{display:none}
 .stg .ml.d span{color:var(--mu)}
 @media(max-width:1000px){.stl{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.stg{grid-template-columns:1fr}.stl{grid-template-columns:1fr}}
+
+/* курси інших класів */
+.gcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:14px}
+.ocl{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;transition:.2s}
+.ocl:hover{border-color:var(--ac);transform:translateY(-2px)}
+.ocl .gn{width:52px;height:52px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#4b8bbe,#306998);box-shadow:inset 0 -4px 0 rgba(255,212,59,.85)}
+.ocl .pt{flex:1;min-width:0}.ocl b{display:block;font-size:16px}.ocl .pt span{display:block;font-size:14px;color:var(--mu)}
+.ocl .go{color:var(--ac);flex:none}.ocl .go svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(prefers-reduced-motion:reduce){.ocl:hover{transform:none}}
+/* квести й бонус у панелі керування */
+.mc .qs{grid-template-columns:1fr;gap:10px;margin:4px 0 8px}
+.mc .qc{padding:12px;box-shadow:none}.mc .qc .qi{width:44px;height:44px}.mc .qc .qi svg{width:26px;height:26px}
+.mc .qc b{font-size:15px}.mc .qc span{font-size:13px}
+.mc .hcards{gap:10px;margin:4px 0 8px}.mc .hcards .card{padding:12px;box-shadow:none}
+.mc .hcards .card h2{font-size:15px;margin:0 0 8px}.mc .lks{grid-template-columns:1fr;gap:8px}

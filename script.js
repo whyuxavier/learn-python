@@ -62,7 +62,7 @@ function snowSync(){
  if(snowState===1)return;
  snowState=1;
  const s=document.createElement('script');s.src='snow.js';s.async=true;
- s.onload=()=>{try{snowCtl=window.PixelSnow&&PixelSnow.mount(snowBox,{color:'#e6ecff',density:.35,opacity:.75,dpr:document.documentElement.classList.contains('lite')?1:0})}catch(e){snowCtl=null}
+ s.onload=()=>{try{snowCtl=window.PixelSnow&&PixelSnow.mount(snowBox,{color:'#e6ecff',density:.1,opacity:.75,dpr:document.documentElement.classList.contains('lite')?1:0})}catch(e){snowCtl=null}
   snowState=snowCtl?2:3;if(!snowCtl)snowBox.remove();else snowSync()};
  s.onerror=()=>{snowState=3;snowBox.remove()};
  document.head.appendChild(s);
@@ -1365,7 +1365,7 @@ function go(i){
  CON.clear();TK.reset();TT.reset();R.ui();
  closeMenu();window.scrollTo(0,0);syncHash();
 }
-$('#nav').onclick=e=>{const b=e.target.closest('.li');if(!b)return;if(!b.dataset.home)hideSide();if(b.dataset.home){closeMenu();showHome();if(b.dataset.home==='quests')setTimeout(()=>$('#quests').scrollIntoView(),50)}else go(+b.dataset.i)};
+$('#nav').onclick=e=>{const b=e.target.closest('.li');if(!b)return;if(!b.dataset.home)hideSide();if(b.dataset.home){closeMenu();showHome();if(b.dataset.home==='quests'){$('#qdet').open=true;openInfo()}}else go(+b.dataset.i)};
 
 /* ---------- вкладки «Теорія | Завдання» ---------- */
 const tabs=store.get('ltab',{}),tpos={};let ltab='th';
@@ -1384,6 +1384,7 @@ $('#ltabs').onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preven
 
 /* ---------- бонус ---------- */
 const TOOLS=[
+ ['https://ed-info.github.io/epython/','єПайтон','Українське онлайн-середовище: Python, tkinter і turtle просто в браузері'],
  ['https://www.python.org/downloads/','Python','Завантаження мови для комп\'ютера'],
  ['https://thonny.org/','Thonny','Простий редактор Python для початківців'],
  ['https://code.visualstudio.com/','Visual Studio Code','Редактор коду з розширенням Python'],
@@ -1504,6 +1505,7 @@ $('#menu').onclick=()=>{
 const modal=$('#modal');
 function openInfo(){modal.hidden=false;$('#mclose').focus()}
 function closeInfo(){modal.hidden=true;$('#info').focus()}
+$('#qlist').addEventListener('click',e=>{if(e.target.closest('a'))modal.hidden=true});
 const rz=$('#rz'),mainEl=$('main');
 function setLc(w){const m=mainEl.getBoundingClientRect().width-32-10-12-360;w=Math.max(280,Math.min(w,m));mainEl.style.setProperty('--lc',w+'px');ui.lc=w}
 rz.onpointerdown=e=>{
