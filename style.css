@@ -270,6 +270,7 @@ body.home header{grid-column:1;position:sticky;top:0;z-index:20}
 .hm{max-width:1160px;margin:0 auto;padding:0 20px 32px}
 .hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:40px;align-items:center;padding:56px 0 44px}
 .hero::before{content:"";position:absolute;inset:0 -40px;z-index:-1;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px),radial-gradient(var(--sb) 1.4px,transparent 1.6px);background-size:32px 32px,32px 32px,32px 32px;background-position:0 0,0 0,-16px -16px;-webkit-mask-image:radial-gradient(ellipse 70% 75% at 62% 48%,#000 25%,transparent 75%);mask-image:radial-gradient(ellipse 70% 75% at 62% 48%,#000 25%,transparent 75%)}
+.hbd{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.gbd{display:inline-flex;align-items:baseline;gap:6px;padding:6px 18px 7px;border-radius:14px;background:var(--ac);color:#fff;font-size:20px;font-weight:600;box-shadow:0 6px 18px color-mix(in srgb,var(--ac) 35%,transparent)}.gbd b{font-size:30px;line-height:1}
 .ebd{display:inline-flex;align-items:center;gap:8px;font-size:13px;padding:5px 12px;border-radius:999px;background:var(--sf);border:1px solid var(--bd);color:var(--mu)}
 .ebd i{width:8px;height:8px;border-radius:50%;background:var(--gold)}
 .hero h2{font-size:clamp(32px,4.6vw,54px);line-height:1.07;letter-spacing:-.02em;margin:16px 0 14px}
